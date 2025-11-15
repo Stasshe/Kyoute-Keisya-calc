@@ -148,6 +148,36 @@ export default function Calculator() {
     }
   }
 
+  function deleteFaculty(univId: string, facId: string) {
+    if (!confirm('この学部を削除しますか？ 学科も全て削除されます。')) return;
+    setUniversities(prev => prev.map(u => {
+      if (u.id !== univId) return u;
+      return { ...u, faculties: u.faculties.filter(f => f.id !== facId) };
+    }));
+    // adjust selection if needed
+    if (selectedFacultyId === facId) {
+      const u = universities.find(x => x.id === univId) ?? universities[0];
+      const newFac = u?.faculties.find(f => f.id !== facId) ?? u?.faculties[0];
+      setSelectedFacultyId(newFac?.id ?? '');
+      setSelectedDeptId(newFac?.departments[0]?.id ?? '');
+    }
+  }
+
+  function deleteDepartment(univId: string, facId: string, deptId: string) {
+    if (!confirm('この学科を削除しますか？')) return;
+    setUniversities(prev => prev.map(u => {
+      if (u.id !== univId) return u;
+      return { ...u, faculties: u.faculties.map(f => f.id === facId ? { ...f, departments: f.departments.filter(d => d.id !== deptId) } : f) };
+    }));
+    // adjust selection if needed
+    if (selectedDeptId === deptId) {
+      const u = universities.find(x => x.id === univId) ?? universities[0];
+      const fac = u?.faculties.find(f => f.id === facId) ?? u?.faculties[0];
+      const newDept = fac?.departments.find(d => d.id !== deptId) ?? fac?.departments[0];
+      setSelectedDeptId(newDept?.id ?? '');
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Universities list - moved to top, vertical */}
@@ -181,12 +211,13 @@ export default function Calculator() {
                   </div>
 
                   <div className="mt-2 space-y-2">
-                    {u.faculties.map(f=> (
+                          {u.faculties.map(f=> (
                       <div key={f.id} className="pl-4">
                         <div className="flex items-center gap-2">
                           <strong className="text-sm">{f.name}</strong>
                           <button onClick={()=> { setSelectedUnivId(u.id); setSelectedFacultyId(f.id); const d = f.departments[0]; setSelectedDeptId(d?.id ?? ''); }} className="px-2 py-0.5 text-xs border rounded">学部選択</button>
                           <button onClick={()=> { /* add department to this faculty */ const id = `dept_${Date.now()}`; setUniversities(prev=> prev.map(x=> x.id===u.id ? { ...x, faculties: x.faculties.map(ff=> ff.id===f.id ? { ...ff, departments: [...ff.departments, { id, name: '新しい学科', weights: SUBJECTS.reduce((acc,s)=>({ ...acc, [s.key]: 0 }), {} as Weights) }] } : ff) } : x)); }} className="px-2 py-0.5 text-xs border rounded">学科追加</button>
+                          <button onClick={() => deleteFaculty(u.id, f.id)} className="px-2 py-0.5 text-xs border rounded text-destructive">学部削除</button>
                         </div>
 
                         <div className="mt-1 grid grid-cols-2 gap-2">
@@ -199,6 +230,7 @@ export default function Calculator() {
                                 </div>
                                 <div className="flex gap-2">
                                   <button onClick={()=> setEditingDept({ univId: u.id, facId: f.id, deptId: d.id, temp: { ...d } })} className="px-2 py-0.5 text-xs border rounded">編集</button>
+                                  <button onClick={()=> deleteDepartment(u.id, f.id, d.id)} className="px-2 py-0.5 text-xs border rounded text-destructive">学科削除</button>
                                 </div>
                               </div>
 
