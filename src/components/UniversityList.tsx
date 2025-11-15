@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import GButton from './GButton';
+import { Plus, ChevronDown, ChevronRight } from 'lucide-react';
 
 import { Department, University } from '@/data/universities';
 
@@ -81,7 +82,10 @@ export default function UniversityList({
         onClick={onAddUniversity}
         className="w-full py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
       >
-        ➕ 大学を追加
+        <span className="inline-flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          大学を追加
+        </span>
       </GButton>
 
       <div className="space-y-2">
@@ -102,7 +106,13 @@ export default function UniversityList({
                 className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 active:bg-gray-100"
               >
                 <div className="flex items-center gap-2 flex-1">
-                  <span className="text-lg">{isExpanded ? '▼' : '▶'}</span>
+                  <span className="text-lg inline-flex items-center">
+                    {isExpanded ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </span>
                   <span className="font-medium text-gray-900">{u.name}</span>
                   {isSelected && (
                     <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
@@ -150,7 +160,13 @@ export default function UniversityList({
                           className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-gray-100 active:bg-gray-200"
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-sm">{isFacExpanded ? '▼' : '▶'}</span>
+                            <span className="text-sm inline-flex items-center">
+                              {isFacExpanded ? (
+                                <ChevronDown className="w-4 h-4" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4" />
+                              )}
+                            </span>
                             <span className="text-sm font-medium text-gray-800">{f.name}</span>
                           </div>
                           <div className="flex gap-1">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import GButton from './GButton';
+import { Plus, ChevronDown, ChevronRight } from 'lucide-react';
 
 import { Faculty, SUBJECTS, University, Weights } from '@/data/universities';
 
@@ -165,7 +166,13 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
                   className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 active:bg-gray-200"
                 >
                   <div className="flex items-center gap-2 flex-1">
-                    <span className="text-sm">{isExpanded ? '▼' : '▶'}</span>
+                    <span className="text-sm inline-flex items-center">
+                      {isExpanded ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </span>
                     <input
                       value={f.name}
                       onChange={e => {
@@ -248,7 +255,10 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
           onClick={addFaculty}
           className="w-full py-2.5 bg-blue-50 text-blue-600 rounded-lg font-medium border border-blue-200 hover:bg-blue-100"
         >
-          ➕ 学部を追加
+          <span className="inline-flex items-center gap-2 justify-center">
+            <Plus className="w-4 h-4" />
+            学部を追加
+          </span>
         </button>
       </div>
 

@@ -13,6 +13,7 @@ import {
 
 import UniversityEditor from './UniversityEditor';
 import UniversityList from './UniversityList';
+import { FileText, GraduationCap } from 'lucide-react';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';
@@ -250,7 +251,10 @@ export default function Calculator() {
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
-            📝 点数入力
+            <span className="inline-flex items-center gap-2 justify-center">
+              <FileText className="w-4 h-4" />
+              点数入力
+            </span>
           </button>
           <button
             onClick={() => setActiveTab('list')}
@@ -260,7 +264,10 @@ export default function Calculator() {
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
             }`}
           >
-            🎓 大学選択
+            <span className="inline-flex items-center gap-2 justify-center">
+              <GraduationCap className="w-4 h-4" />
+              大学選択
+            </span>
           </button>
         </div>
       </div>
