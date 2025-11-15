@@ -11,8 +11,8 @@ import {
   Weights,
 } from '@/data/universities';
 
-import UniversityList from './UniversityList';
 import UniversityEditor from './UniversityEditor';
+import UniversityList from './UniversityList';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';
@@ -26,6 +26,7 @@ function safeNumber(v: string) {
 }
 
 export default function Calculator() {
+  const [activeTab, setActiveTab] = useState<'input' | 'list'>('input');
   const [scores, setScores] = useState<Record<string, number>>(() => {
     try {
       const raw = localStorage.getItem(LS_SCORES);
@@ -73,13 +74,11 @@ export default function Calculator() {
   }, [selectedDeptId]);
 
   useEffect(() => {
-    // persist custom universities (exclude default ones by id)
     const customs = universities.filter(u => !DEFAULT_UNIVERSITIES.some(d => d.id === u.id));
     localStorage.setItem(LS_CUSTOM, JSON.stringify(customs));
   }, [universities]);
 
   useEffect(() => {
-    // initialize selected ids from localStorage or defaults after universities load
     const su = localStorage.getItem(`${LS_SELECTED}_univ`);
     const sf = localStorage.getItem(`${LS_SELECTED}_fac`);
     const sd = localStorage.getItem(`${LS_SELECTED}_dept`);
@@ -110,8 +109,8 @@ export default function Calculator() {
     const dept = fac?.departments.find(d => d.id === selectedDeptId) ?? fac?.departments[0];
     return { university: u, faculty: fac, department: dept } as {
       university?: Univ;
-       faculty?: Faculty;
-       department?: Department;
+      faculty?: Faculty;
+      department?: Department;
     };
   }, [universities, selectedUnivId, selectedFacultyId, selectedDeptId]);
 
@@ -176,7 +175,6 @@ export default function Calculator() {
         return { ...u, faculties: u.faculties.filter(f => f.id !== facId) };
       })
     );
-    // adjust selection if needed
     if (selectedFacultyId === facId) {
       const u = universities.find(x => x.id === univId) ?? universities[0];
       const newFac = u?.faculties.find(f => f.id !== facId) ?? u?.faculties[0];
@@ -198,7 +196,6 @@ export default function Calculator() {
         };
       })
     );
-    // adjust selection if needed
     if (selectedDeptId === deptId) {
       const u = universities.find(x => x.id === univId) ?? universities[0];
       const fac = u?.faculties.find(f => f.id === facId) ?? u?.faculties[0];
@@ -208,150 +205,187 @@ export default function Calculator() {
   }
 
   return (
-    <div className="space-y-6">
-      <UniversityList
-        universities={universities}
-        selectedUnivId={selectedUnivId}
-        selectedDeptId={selectedDeptId}
-        editingDept={editingDept}
-        onAddUniversity={addUniversity}
-        onSelectUniversity={id => {
-          setSelectedUnivId(id);
-          const u = universities.find(x => x.id === id) || universities[0];
-          const f = u?.faculties[0];
-          setSelectedFacultyId(f?.id ?? '');
-          setSelectedDeptId(f?.departments[0]?.id ?? '');
-        }}
-        onSelectFaculty={(univId, facId) => {
-          setSelectedUnivId(univId);
-          setSelectedFacultyId(facId);
-          const u = universities.find(x => x.id === univId) || universities[0];
-          const f = u?.faculties.find(ff => ff.id === facId) || u?.faculties[0];
-          setSelectedDeptId(f?.departments[0]?.id ?? '');
-        }}
-        onSelectDept={(univId, facId, deptId) => {
-          setSelectedUnivId(univId);
-          setSelectedFacultyId(facId);
-          setSelectedDeptId(deptId);
-        }}
-        onSetEditingDept={p => setEditingDept(p)}
-        onEditUniversity={u => setEditingUniversity(u)}
-        addDepartment={(univId, facId) => {
-          const id = `dept_${Date.now()}`;
-          setUniversities(prev =>
-            prev.map(x =>
-              x.id === univId
-                ? {
-                    ...x,
-                    faculties: x.faculties.map(ff =>
-                      ff.id === facId
-                        ? {
-                            ...ff,
-                            departments: [
-                              ...ff.departments,
-                              {
-                                id,
-                                name: '新しい学科',
-                                weights: SUBJECTS.reduce(
-                                  (acc, s) => ({ ...acc, [s.key]: 0 }),
-                                  {} as Weights
-                                ),
-                              },
-                            ],
-                          }
-                        : ff
-                    ),
-                  }
-                : x
-            )
-          );
-        }}
-        deleteUniversity={id => deleteUniversity(id)}
-        deleteFaculty={(univId, facId) => deleteFaculty(univId, facId)}
-        deleteDepartment={(univId, facId, deptId) => deleteDepartment(univId, facId, deptId)}
-        saveDept={({ univId, facId, deptId, temp }) => {
-          setUniversities(prev =>
-            prev.map(u2 => {
-              if (u2.id !== univId) return u2;
-              return {
-                ...u2,
-                faculties: u2.faculties.map(f2 => {
-                  if (f2.id !== facId) return f2;
-                  return {
-                    ...f2,
-                    departments: f2.departments.map(d2 => (d2.id === deptId ? { ...temp } : d2)),
-                  };
-                }),
-              };
-            })
-          );
-          setEditingDept(null);
-        }}
-      />
-
-      {editingUniversity && (
-        <div className="mt-4">
-          <UniversityEditor
-            initialUniversity={editingUniversity}
-            onSave={u => {
-              setUniversities(prev => prev.map(p => (p.id === u.id ? u : p)));
-              setEditingUniversity(null);
-            }}
-            onCancel={() => setEditingUniversity(null)}
-          />
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <div className="bg-card border rounded-md p-4">
-            <h2 className="font-medium mb-3">点数入力</h2>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {SUBJECTS.map(s => (
-                <div key={s.key} className="flex flex-col">
-                  <label className="text-sm">{s.label}</label>
-                  <input
-                    inputMode="numeric"
-                    value={scores[s.key] ?? ''}
-                    onChange={e => updateScore(s.key, e.target.value)}
-                    placeholder="空欄は0と見なします"
-                    className="mt-1 px-3 py-2 border rounded-md"
-                  />
-                  <span className="text-xs text-muted-foreground">満点: {s.max}</span>
-                </div>
-              ))}
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* ヘッダー - 固定表示 */}
+      <div className="sticky top-0 z-10 bg-white border-b shadow-sm">
+        <div className="px-3 py-2">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-lg font-bold text-gray-900">共通テスト換算計算機</h1>
+            <button
+              onClick={() => {
+                if (confirm('全ての入力データをクリアしますか？')) {
+                  setScores({});
+                  localStorage.removeItem(LS_SCORES);
+                }
+              }}
+              className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded border border-red-200 hover:bg-red-100"
+            >
+              リセット
+            </button>
           </div>
 
-          <div className="mt-4 flex gap-3">
-            <div className="flex-1 bg-card border rounded-md p-4">
-              <h3 className="text-sm font-medium mb-2">計算結果</h3>
-              <div className="text-3xl font-semibold">{total}</div>
-              <div className="text-sm text-muted-foreground mt-1">
-                選択中: {selected?.university?.name ?? ''}
-              </div>
-            </div>
-
-            <div className="w-48 bg-card border rounded-md p-4 flex flex-col justify-between">
+          {/* 計算結果表示 */}
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-3">
+            <div className="flex items-end justify-between">
               <div>
-                <h3 className="text-sm font-medium mb-2">保存</h3>
-                <p className="text-xs text-muted-foreground">入力は自動保存されます。</p>
+                <div className="text-xs opacity-90 mb-0.5">換算後得点</div>
+                <div className="text-3xl font-bold">{total}</div>
               </div>
-              <div className="text-right">
-                <button
-                  onClick={() => {
-                    setScores({});
-                    localStorage.removeItem(LS_SCORES);
-                  }}
-                  className="mt-2 px-3 py-2 border rounded-md text-sm"
-                >
-                  クリア
-                </button>
+              <div className="text-right text-xs opacity-90 max-w-[60%]">
+                <div className="truncate">{selected?.university?.name}</div>
+                <div className="truncate">{selected?.faculty?.name}</div>
+                <div className="truncate font-medium">{selected?.department?.name}</div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* タブ切り替え */}
+        <div className="flex border-t">
+          <button
+            onClick={() => setActiveTab('input')}
+            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'input'
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            📝 点数入力
+          </button>
+          <button
+            onClick={() => setActiveTab('list')}
+            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'list'
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            🎓 大学選択
+          </button>
+        </div>
+      </div>
+
+      {/* コンテンツエリア */}
+      <div className="pb-4">
+        {activeTab === 'input' ? (
+          <div className="p-3 space-y-2">
+            {SUBJECTS.map(s => (
+              <div key={s.key} className="bg-white rounded-lg border p-2.5 shadow-sm">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-sm font-medium text-gray-700">{s.label}</label>
+                  <span className="text-xs text-gray-500">/ {s.max}点</span>
+                </div>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={scores[s.key] ?? ''}
+                  onChange={e => updateScore(s.key, e.target.value)}
+                  placeholder="0"
+                  className="w-full px-3 py-2.5 text-base border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            ))}
+            <div className="text-xs text-gray-500 text-center pt-2">入力は自動保存されます</div>
+          </div>
+        ) : (
+          <div className="p-3">
+            {editingUniversity ? (
+              <UniversityEditor
+                initialUniversity={editingUniversity}
+                onSave={u => {
+                  setUniversities(prev => prev.map(p => (p.id === u.id ? u : p)));
+                  setEditingUniversity(null);
+                }}
+                onCancel={() => setEditingUniversity(null)}
+              />
+            ) : (
+              <UniversityList
+                universities={universities}
+                selectedUnivId={selectedUnivId}
+                selectedDeptId={selectedDeptId}
+                editingDept={editingDept}
+                onAddUniversity={addUniversity}
+                onSelectUniversity={id => {
+                  setSelectedUnivId(id);
+                  const u = universities.find(x => x.id === id) || universities[0];
+                  const f = u?.faculties[0];
+                  setSelectedFacultyId(f?.id ?? '');
+                  setSelectedDeptId(f?.departments[0]?.id ?? '');
+                }}
+                onSelectFaculty={(univId, facId) => {
+                  setSelectedUnivId(univId);
+                  setSelectedFacultyId(facId);
+                  const u = universities.find(x => x.id === univId) || universities[0];
+                  const f = u?.faculties.find(ff => ff.id === facId) || u?.faculties[0];
+                  setSelectedDeptId(f?.departments[0]?.id ?? '');
+                }}
+                onSelectDept={(univId, facId, deptId) => {
+                  setSelectedUnivId(univId);
+                  setSelectedFacultyId(facId);
+                  setSelectedDeptId(deptId);
+                  setActiveTab('input');
+                }}
+                onSetEditingDept={p => setEditingDept(p)}
+                onEditUniversity={u => setEditingUniversity(u)}
+                addDepartment={(univId, facId) => {
+                  const id = `dept_${Date.now()}`;
+                  setUniversities(prev =>
+                    prev.map(x =>
+                      x.id === univId
+                        ? {
+                            ...x,
+                            faculties: x.faculties.map(ff =>
+                              ff.id === facId
+                                ? {
+                                    ...ff,
+                                    departments: [
+                                      ...ff.departments,
+                                      {
+                                        id,
+                                        name: '新しい学科',
+                                        weights: SUBJECTS.reduce(
+                                          (acc, s) => ({ ...acc, [s.key]: 0 }),
+                                          {} as Weights
+                                        ),
+                                      },
+                                    ],
+                                  }
+                                : ff
+                            ),
+                          }
+                        : x
+                    )
+                  );
+                }}
+                deleteUniversity={id => deleteUniversity(id)}
+                deleteFaculty={(univId, facId) => deleteFaculty(univId, facId)}
+                deleteDepartment={(univId, facId, deptId) =>
+                  deleteDepartment(univId, facId, deptId)
+                }
+                saveDept={({ univId, facId, deptId, temp }) => {
+                  setUniversities(prev =>
+                    prev.map(u2 => {
+                      if (u2.id !== univId) return u2;
+                      return {
+                        ...u2,
+                        faculties: u2.faculties.map(f2 => {
+                          if (f2.id !== facId) return f2;
+                          return {
+                            ...f2,
+                            departments: f2.departments.map(d2 =>
+                              d2.id === deptId ? { ...temp } : d2
+                            ),
+                          };
+                        }),
+                      };
+                    })
+                  );
+                  setEditingDept(null);
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

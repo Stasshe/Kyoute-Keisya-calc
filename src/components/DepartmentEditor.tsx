@@ -11,39 +11,50 @@ type Props = {
 
 export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: Props) {
   return (
-    <div className="mt-2 p-3 bg-card border rounded">
-      <div className="mb-2">
-        <label className="text-xs">学科名</label>
+    <div className="p-3 bg-white border-2 border-blue-500 rounded-lg shadow-lg">
+      <div className="mb-3">
+        <label className="block text-xs font-medium text-gray-700 mb-1">学科名</label>
         <input
           value={temp.name}
           onChange={e => onChange({ ...temp, name: e.target.value })}
-          className="mt-1 w-full px-2 py-1 border rounded"
+          className="w-full px-3 py-2 text-sm border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="学科名を入力"
         />
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {SUBJECTS.map(s => (
-          <div key={s.key}>
-            <label className="text-xs">{s.label}</label>
-            <input
-              className="mt-1 w-full px-2 py-1 border rounded"
-              value={String(temp.weights[s.key] ?? 0)}
-              onChange={e => {
-                const nv = Number.isFinite(parseFloat(e.target.value))
-                  ? parseFloat(e.target.value)
-                  : 0;
-                onChange({ ...temp, weights: { ...temp.weights, [s.key]: nv } });
-              }}
-            />
-          </div>
-        ))}
+
+      <div className="mb-3">
+        <div className="text-xs font-medium text-gray-700 mb-2">配点設定</div>
+        <div className="grid grid-cols-2 gap-2">
+          {SUBJECTS.map(s => (
+            <div key={s.key} className="bg-gray-50 p-2 rounded border">
+              <label className="block text-xs text-gray-600 mb-1">{s.label}</label>
+              <input
+                type="number"
+                inputMode="numeric"
+                className="w-full px-2 py-1.5 text-sm border rounded-md focus:ring-2 focus:ring-blue-500"
+                value={String(temp.weights[s.key] ?? 0)}
+                onChange={e => {
+                  const nv = Number.isFinite(parseFloat(e.target.value))
+                    ? parseFloat(e.target.value)
+                    : 0;
+                  onChange({ ...temp, weights: { ...temp.weights, [s.key]: nv } });
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="mt-3 flex gap-2 justify-end">
-        <button onClick={onCancel} className="px-3 py-1 border rounded text-sm">
+
+      <div className="flex gap-2">
+        <button
+          onClick={onCancel}
+          className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-md font-medium hover:bg-gray-200"
+        >
           キャンセル
         </button>
         <button
           onClick={onSave}
-          className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm"
+          className="flex-1 py-2 bg-blue-500 text-white rounded-md font-medium hover:bg-blue-600"
         >
           保存
         </button>

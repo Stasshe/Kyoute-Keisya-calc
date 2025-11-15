@@ -19,6 +19,22 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
     })),
   });
 
+  const [expandedFacs, setExpandedFacs] = useState<Set<string>>(
+    new Set(univ.faculties.map(f => f.id))
+  );
+
+  function toggleFac(id: string) {
+    setExpandedFacs(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
   function updateUnivName(name: string) {
     setUniv(u => ({ ...u, name }));
   }
@@ -44,6 +60,7 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
       ],
     };
     setUniv(u => ({ ...u, faculties: [...u.faculties, newF] }));
+    setExpandedFacs(prev => new Set([...prev, id]));
   }
 
   function deleteFaculty(facId: string) {
@@ -114,87 +131,137 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
   }
 
   return (
-    <div className="p-4 bg-card border rounded-md shadow-sm">
-      <div className="mb-3">
-        <label className="text-sm font-medium">大学名</label>
-        <input
-          value={univ.name}
-          onChange={e => updateUnivName(e.target.value)}
-          className="mt-1 w-full px-3 py-2 border rounded-md bg-white text-sm"
-        />
+    <div className="bg-white rounded-lg border shadow-lg">
+      {/* ヘッダー */}
+      <div className="p-4 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+        <h2 className="text-lg font-bold">大学編集</h2>
       </div>
 
-      <div className="space-y-4">
-        {univ.faculties.map(f => (
-          <div key={f.id} className="p-2 border rounded">
-            <div className="flex items-center gap-2 mb-2">
-              <input
-                value={f.name}
-                onChange={e => updateFacultyName(f.id, e.target.value)}
-                className="flex-1 px-2 py-1 border rounded"
-              />
-              <button
-                onClick={() => addDepartment(f.id)}
-                className="px-2 py-1 border rounded text-sm"
-              >
-                学科追加
-              </button>
-              <button
-                onClick={() => deleteFaculty(f.id)}
-                className="px-2 py-1 border rounded text-sm text-destructive"
-              >
-                学部削除
-              </button>
-            </div>
+      <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        {/* 大学名 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">大学名</label>
+          <input
+            value={univ.name}
+            onChange={e => updateUnivName(e.target.value)}
+            className="w-full px-3 py-2.5 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="大学名を入力"
+          />
+        </div>
 
-            <div className="space-y-2">
-              {f.departments.map(d => (
-                <div key={d.id} className="p-2 bg-white border rounded">
-                  <div className="mb-2 flex items-center gap-2">
+        {/* 学部リスト */}
+        <div className="space-y-3">
+          {univ.faculties.map(f => {
+            const isExpanded = expandedFacs.has(f.id);
+
+            return (
+              <div key={f.id} className="border rounded-lg overflow-hidden bg-gray-50">
+                {/* 学部ヘッダー */}
+                <div
+                  onClick={() => toggleFac(f.id)}
+                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 active:bg-gray-200"
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-sm">{isExpanded ? '▼' : '▶'}</span>
                     <input
-                      value={d.name}
-                      onChange={e => updateDepartmentName(f.id, d.id, e.target.value)}
-                      className="flex-1 px-2 py-1 border rounded"
+                      value={f.name}
+                      onChange={e => {
+                        e.stopPropagation();
+                        updateFacultyName(f.id, e.target.value);
+                      }}
+                      onClick={e => e.stopPropagation()}
+                      className="flex-1 px-2 py-1.5 text-sm border rounded bg-white"
+                      placeholder="学部名"
                     />
+                  </div>
+                  <div className="flex gap-1 ml-2">
                     <button
-                      onClick={() => deleteDepartment(f.id, d.id)}
-                      className="px-2 py-1 border rounded text-sm text-destructive"
+                      onClick={e => {
+                        e.stopPropagation();
+                        addDepartment(f.id);
+                      }}
+                      className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
                     >
-                      学科削除
+                      学科追加
+                    </button>
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        deleteFaculty(f.id);
+                      }}
+                      className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100"
+                    >
+                      削除
                     </button>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    {SUBJECTS.map(s => (
-                      <div key={s.key}>
-                        <label className="text-xs text-muted-foreground">{s.label}</label>
-                        <input
-                          value={String(d.weights[s.key] ?? 0)}
-                          onChange={e => updateDeptWeight(f.id, d.id, s.key, e.target.value)}
-                          className="mt-1 w-full px-2 py-1 border rounded-md text-sm"
-                        />
+                {/* 学科リスト */}
+                {isExpanded && (
+                  <div className="p-3 pt-0 space-y-2">
+                    {f.departments.map(d => (
+                      <div key={d.id} className="bg-white border rounded-lg p-3">
+                        {/* 学科名 */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <input
+                            value={d.name}
+                            onChange={e => updateDepartmentName(f.id, d.id, e.target.value)}
+                            className="flex-1 px-2 py-1.5 text-sm border rounded"
+                            placeholder="学科名"
+                          />
+                          <button
+                            onClick={() => deleteDepartment(f.id, d.id)}
+                            className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100"
+                          >
+                            削除
+                          </button>
+                        </div>
+
+                        {/* 配点 */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {SUBJECTS.map(s => (
+                            <div key={s.key} className="bg-gray-50 p-2 rounded border">
+                              <label className="block text-xs text-gray-600 mb-1">{s.label}</label>
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                value={String(d.weights[s.key] ?? 0)}
+                                onChange={e => updateDeptWeight(f.id, d.id, s.key, e.target.value)}
+                                className="w-full px-2 py-1.5 text-sm border rounded bg-white"
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={addFaculty}
+          className="w-full py-2.5 bg-blue-50 text-blue-600 rounded-lg font-medium border border-blue-200 hover:bg-blue-100"
+        >
+          ➕ 学部を追加
+        </button>
       </div>
 
-      <div className="mt-3 flex gap-2 justify-end">
-        <button onClick={onCancel} className="px-3 py-2 border rounded-md text-sm">
+      {/* フッター */}
+      <div className="p-4 border-t bg-gray-50 flex gap-2">
+        <button
+          onClick={onCancel}
+          className="flex-1 py-2.5 bg-white text-gray-700 rounded-lg font-medium border hover:bg-gray-100"
+        >
           キャンセル
         </button>
         <button
           onClick={() => onSave(univ)}
-          className="px-3 py-2 bg-primary text-primary-foreground rounded-md text-sm"
+          className="flex-1 py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600"
         >
           保存
-        </button>
-        <button onClick={addFaculty} className="px-3 py-2 border rounded-md text-sm">
-          学部追加
         </button>
       </div>
     </div>

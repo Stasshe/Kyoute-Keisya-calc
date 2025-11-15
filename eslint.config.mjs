@@ -12,7 +12,17 @@ const compat = new FlatCompat({
 const eslintConfig = [
   // Ignore common build output and deployment artifacts
   // Ignore common build output and deployment artifacts
-  { ignores: ['**/node_modules/**', '.next/**', 'out/**', 'build/**', 'dist/**', '.vercel/**', 'next-env.d.ts'] },
+  {
+    ignores: [
+      '**/node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'dist/**',
+      '.vercel/**',
+      'next-env.d.ts',
+    ],
+  },
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   {
     rules: {
