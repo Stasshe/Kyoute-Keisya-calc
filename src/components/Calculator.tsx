@@ -251,7 +251,7 @@ export default function Calculator() {
             <h1 className="text-lg font-bold text-gray-900">共通テスト換算計算機</h1>
             <button
               onClick={() => {
-                if (confirm('全ての入力データをクリアしますか？')) {
+                if (confirm('点数入力のデータをクリアしますか？(傾斜配点データは消えません。)')) {
                   setScores({});
                   localStorage.removeItem(LS_SCORES);
                 }
