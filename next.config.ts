@@ -4,8 +4,9 @@
 const isProductionBuild = process.env.BUILD_MODE === 'production';
 
 let basePathEnv = process.env.NEXT_PUBLIC_BASE_PATH || '';
-if (isProductionBuild && !basePathEnv) {
-  basePathEnv = '/' + 'Kyoute-Keisya-calc';
+// Normalize: ensure basePathEnv (if present) starts with a leading '/'
+if (basePathEnv && !basePathEnv.startsWith('/')) {
+  basePathEnv = '/' + basePathEnv;
 }
 const configuredBasePath = basePathEnv || undefined;
 // 開発環境でも静的エクスポートに近い動作をさせるために共通設定を定義
