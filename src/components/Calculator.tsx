@@ -11,9 +11,9 @@ import {
   Weights,
 } from '@/data/universities';
 
+import { FileText, GraduationCap } from 'lucide-react';
 import UniversityEditor from './UniversityEditor';
 import UniversityList from './UniversityList';
-import { FileText, GraduationCap } from 'lucide-react';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';

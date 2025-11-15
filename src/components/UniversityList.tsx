@@ -1,8 +1,8 @@
 'use client';
 
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import GButton from './GButton';
-import { Plus, ChevronDown, ChevronRight } from 'lucide-react';
 
 import { Department, University } from '@/data/universities';
 
