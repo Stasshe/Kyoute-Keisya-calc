@@ -11,7 +11,6 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   // Ignore common build output and deployment artifacts
-  // Ignore common build output and deployment artifacts
   {
     ignores: [
       '**/node_modules/**',

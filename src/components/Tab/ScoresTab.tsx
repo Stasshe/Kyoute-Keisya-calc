@@ -11,7 +11,9 @@ export default function ScoresTab({ scores, updateScore }: Props) {
   return (
     <div className="p-3 space-y-2">
       <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded text-sm text-gray-700">
-        理系型の人は、社会②を0または空欄にしてください。<br />文系型の人は、理科基礎の合計を理科①に入力してください。
+        理系型の人は、社会②を0または空欄にしてください。
+        <br />
+        文系型の人は、理科基礎の合計を理科①に入力してください。
       </div>
       {SUBJECTS.map(s => (
         <div key={s.key} className="bg-white rounded-lg border p-2.5 shadow-sm">
@@ -30,10 +32,14 @@ export default function ScoresTab({ scores, updateScore }: Props) {
         </div>
       ))}
       <div className="text-xs text-gray-500 text-center pt-2">
-        入力は自動保存されます。<br/>
-        サイト内の全ての入力データは、あなたの端末のブラウザ内に保存され、サーバーには一切送信されません。<br/>
-        MITライセンスで提供されています。<br/>
-        © 2025 Stasshe/Roughfts. All rights reserved.<br/>
+        入力は自動保存されます。
+        <br />
+        サイト内の全ての入力データは、あなたの端末のブラウザ内に保存され、サーバーには一切送信されません。
+        <br />
+        MITライセンスで提供されています。
+        <br />
+        © 2025 Stasshe/Roughfts. All rights reserved.
+        <br />
       </div>
     </div>
   );

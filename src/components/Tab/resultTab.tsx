@@ -28,12 +28,7 @@ type Props = {
   facultyName?: string;
 };
 
-export default function ResultsTab({
-  scores,
-  department,
-  universityName,
-  facultyName
-}: Props) {
+export default function ResultsTab({ scores, department, universityName, facultyName }: Props) {
   // トグル状態: 'none' | 'social2' | 'sci2'
   const [ignoreSubject, setIgnoreSubject] = useState<'social2' | 'sci2'>(() => {
     try {
@@ -380,11 +375,11 @@ export default function ResultsTab({
                   <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#6b7280' }} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
                   <Radar
-                      name="得点率 (%)"
-                      dataKey="得点率"
-                      stroke="#3b82f6"
-                      fill="#3b82f6"
-                      fillOpacity={0.5}
+                    name="得点率 (%)"
+                    dataKey="得点率"
+                    stroke="#3b82f6"
+                    fill="#3b82f6"
+                    fillOpacity={0.5}
                   />
                   <Tooltip
                     contentStyle={{
@@ -402,7 +397,7 @@ export default function ResultsTab({
 
             {/* 換算後: 換算得点（点数表示） */}
             <div className="w-full h-64">
-                <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={weightRateData.data}>
                   <PolarGrid stroke="#e5e7eb" />
                   <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#6b7280' }} />

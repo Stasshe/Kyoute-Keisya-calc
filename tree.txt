@@ -9,10 +9,16 @@
 ├── package.json
 ├── postcss.config.js
 ├── public
-│   ├── favicon.png
+│   ├── apple-icon.png
+│   ├── favicon.ico
 │   ├── file.svg
 │   ├── globe.svg
+│   ├── icon0.svg
+│   ├── icon1.png
+│   ├── manifest.json
 │   ├── next.svg
+│   ├── web-app-manifest-192x192.png
+│   ├── web-app-manifest-512x512.png
 │   └── window.svg
 ├── src
 │   ├── app
@@ -26,7 +32,8 @@
 │   │   ├── Modal.tsx
 │   │   ├── Tab
 │   │   │   ├── ScoresTab.tsx
-│   │   │   └── UniversityTab.tsx
+│   │   │   ├── UniversityTab.tsx
+│   │   │   └── resultTab.tsx
 │   │   ├── UniversityEditor.tsx
 │   │   └── UniversityList.tsx
 │   └── data
@@ -37,12 +44,12 @@
 ├── tsconfig.json
 └── tsconfig.tsbuildinfo
 
-7 directories, 31 files
+7 directories, 38 files
 
 src/*.ts, *.tsx の統計:
-合計行数: 1270
-合計文字数: 44620
-合計ファイルサイズ(bytes): 45414
+合計行数: 1905
+合計文字数: 68419
+合計ファイルサイズ(bytes): 70775
 
 開発環境の容量:
-701M	.
+764M	.
