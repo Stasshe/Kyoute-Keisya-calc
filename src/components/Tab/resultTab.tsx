@@ -355,35 +355,73 @@ export default function ResultsTab({
         </div>
       </div>
 
-      {/* レーダーチャート */}
+      {/* レーダーチャート（素点 と 換算後を横並び） */}
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-3 py-2 border-b">
-          <h3 className="font-semibold text-gray-900 text-sm">得点率分析</h3>
+          <h3 className="font-semibold text-gray-900 text-sm">得点分析（素点 / 換算後）</h3>
         </div>
         <div className="p-3">
-          <ResponsiveContainer width="100%" height={280}>
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="#e5e7eb" />
-              <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#6b7280' }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
-              <Radar
-                name="得点率 (%)"
-                dataKey="得点率"
-                stroke="#3b82f6"
-                fill="#3b82f6"
-                fillOpacity={0.5}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.5rem',
-                  fontSize: '12px',
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px' }} />
-            </RadarChart>
-          </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 素点: 得点率 (%) */}
+            <div className="w-full h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke="#e5e7eb" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#6b7280' }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <Radar
+                    name="素点 得点率 (%)"
+                    dataKey="得点率"
+                    stroke="#3b82f6"
+                    fill="#3b82f6"
+                    fillOpacity={0.5}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.5rem',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value: number) => [`${value}%`, '得点率']}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* 換算後: 換算得点（点数表示） */}
+            <div className="w-full h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={subjectDetails.filter(s => !s.isIgnored).map(s => ({ subject: s.label, 換算後: Math.round(s.weighted * 100) / 100, 配点: s.weight }))}>
+                  <PolarGrid stroke="#e5e7eb" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#6b7280' }} />
+                  <PolarRadiusAxis
+                    angle={90}
+                    domain={[0, Math.max(1, ...subjectDetails.map(s => s.weight))]}
+                    tick={{ fontSize: 10 }}
+                  />
+                  <Radar
+                    name="換算後 得点"
+                    dataKey="換算後"
+                    stroke="#8b5cf6"
+                    fill="#8b5cf6"
+                    fillOpacity={0.5}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '0.5rem',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value: number) => [`${Math.round(value * 100) / 100}点`, '換算後']}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </div>
 
