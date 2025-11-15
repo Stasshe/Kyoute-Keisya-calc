@@ -1,7 +1,7 @@
 'use client';
 
 import { Award, FileText, GraduationCap } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 
 import {
   DEFAULT_UNIVERSITIES,
@@ -29,24 +29,13 @@ function safeNumber(v: string) {
 
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'input' | 'list' | 'result'>('input');
-  const [scores, setScores] = useState<Record<string, number>>(() => {
-    try {
-      const raw = localStorage.getItem(LS_SCORES);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  });
+  const [scores, setScores] = useState<Record<string, number>>({});
 
-  const [universities, setUniversities] = useState<Univ[]>(() => {
-    try {
-      const raw = localStorage.getItem(LS_CUSTOM);
-      const customs = raw ? JSON.parse(raw) : [];
-      return [...DEFAULT_UNIVERSITIES, ...customs];
-    } catch {
-      return [...DEFAULT_UNIVERSITIES];
-    }
-  });
+  const [universities, setUniversities] = useState<Univ[]>(() => [...DEFAULT_UNIVERSITIES]);
+
+  const scoresWriteSkip = useRef(true);
+  const selectedWriteSkip = useRef(true);
+  const customsWriteSkip = useRef(true);
 
   const [selectedUnivId, setSelectedUnivId] = useState<string>('');
   const [selectedFacultyId, setSelectedFacultyId] = useState<string>('');
@@ -60,25 +49,56 @@ export default function Calculator() {
   const [editingUniversity, setEditingUniversity] = useState<null | University>(null);
 
   useEffect(() => {
+    if (scoresWriteSkip.current) {
+      scoresWriteSkip.current = false;
+      return;
+    }
     localStorage.setItem(LS_SCORES, JSON.stringify(scores));
   }, [scores]);
 
   useEffect(() => {
+    if (selectedWriteSkip.current) return;
     localStorage.setItem(`${LS_SELECTED}_univ`, selectedUnivId);
   }, [selectedUnivId]);
 
   useEffect(() => {
+    if (selectedWriteSkip.current) return;
     localStorage.setItem(`${LS_SELECTED}_fac`, selectedFacultyId);
   }, [selectedFacultyId]);
 
   useEffect(() => {
+    if (selectedWriteSkip.current) return;
     localStorage.setItem(`${LS_SELECTED}_dept`, selectedDeptId);
   }, [selectedDeptId]);
 
   useEffect(() => {
     const customs = universities.filter(u => !DEFAULT_UNIVERSITIES.some(d => d.id === u.id));
+    if (customsWriteSkip.current) {
+      customsWriteSkip.current = false;
+      return;
+    }
     localStorage.setItem(LS_CUSTOM, JSON.stringify(customs));
   }, [universities]);
+
+  // Load persisted data after mount to avoid hydration mismatch and enable writes
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LS_SCORES);
+      if (raw) setScores(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
+
+    try {
+      const raw = localStorage.getItem(LS_CUSTOM);
+      const customs = raw ? JSON.parse(raw) : [];
+      if (customs && customs.length) setUniversities([...DEFAULT_UNIVERSITIES, ...customs]);
+    } catch {
+      // ignore
+    }
+
+    selectedWriteSkip.current = false;
+  }, []);
 
   useEffect(() => {
     const su = localStorage.getItem(`${LS_SELECTED}_univ`);
