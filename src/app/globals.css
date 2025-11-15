@@ -61,4 +61,20 @@
       'rlig' 1,
       'calt' 1;
   }
+
+  /* Make the entire app fill the viewport and prevent page scrolling */
+  html,
+  body,
+  #__next {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Allow the main app container to scroll internally while keeping the
+     overall page (body) non-scrollable. */
+  main {
+    height: 100vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
