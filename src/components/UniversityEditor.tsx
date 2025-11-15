@@ -1,7 +1,8 @@
 'use client';
 
-import { Faculty, SUBJECTS, University, Weights } from '@/data/universities';
 import { useState } from 'react';
+
+import { Faculty, SUBJECTS, University, Weights } from '@/data/universities';
 
 type Props = {
   initialUniversity: University;

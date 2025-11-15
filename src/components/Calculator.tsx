@@ -1,13 +1,16 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
+
 import {
   DEFAULT_UNIVERSITIES,
   Department,
+  Faculty,
   SUBJECTS,
   University,
   Weights,
 } from '@/data/universities';
-import { useEffect, useMemo, useState } from 'react';
+
 import DepartmentEditor from './DepartmentEditor';
 import UniversityEditor from './UniversityEditor';
 import UniversityList from './UniversityList';
@@ -109,8 +112,8 @@ export default function Calculator() {
     const dept = fac?.departments.find(d => d.id === selectedDeptId) ?? fac?.departments[0];
     return { university: u, faculty: fac, department: dept } as {
       university?: Univ;
-      faculty?: any;
-      department?: any;
+       faculty?: Faculty;
+       department?: Department;
     };
   }, [universities, selectedUnivId, selectedFacultyId, selectedDeptId]);
 
@@ -217,7 +220,6 @@ export default function Calculator() {
       <UniversityList
         universities={universities}
         selectedUnivId={selectedUnivId}
-        
         selectedDeptId={selectedDeptId}
         editingDept={editingDept}
         onAddUniversity={addUniversity}

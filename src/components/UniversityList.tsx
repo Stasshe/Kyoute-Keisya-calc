@@ -1,6 +1,7 @@
 'use client';
 
 import { Department, University } from '@/data/universities';
+
 import DepartmentEditor from './DepartmentEditor';
 
 type Props = {
@@ -135,7 +136,9 @@ export default function UniversityList({
                               editingDept.deptId === d.id && (
                                 <DepartmentEditor
                                   temp={editingDept.temp}
-                                  onChange={(t: Department) => onSetEditingDept({ ...editingDept, temp: t })}
+                                  onChange={(t: Department) =>
+                                    onSetEditingDept({ ...editingDept, temp: t })
+                                  }
                                   onCancel={() => onSetEditingDept(null)}
                                   onSave={() => saveDept(editingDept)}
                                 />
