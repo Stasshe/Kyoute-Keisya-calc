@@ -49,6 +49,8 @@ jobs:
         run: npm install
       - name: Build with Next.js
         env:
+          NEXT_PUBLIC_IS_PRODUCTION_BUILD: 'true'
+          NEXT_PUBLIC_BASE_PATH: 'Kyoute-Keisya-calc'
           BUILD_MODE: production
         run: npm run build
       - name: Upload artifact

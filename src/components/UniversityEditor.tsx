@@ -26,9 +26,19 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
     setUniv(u=> ({ ...u, faculties: [...u.faculties, newF] }));
   }
 
+  function deleteFaculty(facId: string) {
+    if (!confirm('この学部を削除しますか？学科も全て削除されます。')) return;
+    setUniv(u => ({ ...u, faculties: u.faculties.filter(f => f.id !== facId) }));
+  }
+
   function addDepartment(facId: string) {
     const id = `dept_${Date.now()}`;
     setUniv(u=> ({ ...u, faculties: u.faculties.map(f=> f.id===facId ? { ...f, departments: [...f.departments, { id, name: '新しい学科', weights: SUBJECTS.reduce((acc,s)=>({ ...acc, [s.key]: 0 }), {} as Weights) }] } : f) }));
+  }
+
+  function deleteDepartment(facId: string, deptId: string) {
+    if (!confirm('この学科を削除しますか？')) return;
+    setUniv(u => ({ ...u, faculties: u.faculties.map(f => f.id === facId ? { ...f, departments: f.departments.filter(d => d.id !== deptId) } : f) }));
   }
 
   function updateDepartmentName(facId: string, deptId: string, name: string) {
@@ -57,6 +67,7 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
             <div className="flex items-center gap-2 mb-2">
               <input value={f.name} onChange={(e)=> updateFacultyName(f.id, e.target.value)} className="flex-1 px-2 py-1 border rounded" />
               <button onClick={()=> addDepartment(f.id)} className="px-2 py-1 border rounded text-sm">学科追加</button>
+              <button onClick={()=> deleteFaculty(f.id)} className="px-2 py-1 border rounded text-sm text-destructive">学部削除</button>
             </div>
 
             <div className="space-y-2">
@@ -64,6 +75,7 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
                 <div key={d.id} className="p-2 bg-white border rounded">
                   <div className="mb-2 flex items-center gap-2">
                     <input value={d.name} onChange={(e)=> updateDepartmentName(f.id, d.id, e.target.value)} className="flex-1 px-2 py-1 border rounded" />
+                    <button onClick={()=> deleteDepartment(f.id, d.id)} className="px-2 py-1 border rounded text-sm text-destructive">学科削除</button>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
