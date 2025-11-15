@@ -22,15 +22,9 @@ export default function Modal({ children, onClose }: Props) {
       aria-modal="true"
       role="dialog"
     >
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      <div
-        className="relative max-w-lg w-full mx-4"
-        onClick={e => e.stopPropagation()}
-      >
+      <div className="relative max-w-lg w-full mx-4" onClick={e => e.stopPropagation()}>
         {children}
       </div>
     </div>

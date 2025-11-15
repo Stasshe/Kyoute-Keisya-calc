@@ -159,11 +159,15 @@ export default function Calculator() {
   function deleteUniversity(id: string) {
     setUniversities(u => u.filter(x => x.id !== id));
     if (selectedUnivId === id) {
-      const first = universities.find(u => u.id !== id) || DEFAULT_UNIVERSITIES[0];
+      const first = universities.find(u => u.id !== id);
       if (first) {
         setSelectedUnivId(first.id);
         setSelectedFacultyId(first.faculties[0]?.id ?? '');
         setSelectedDeptId(first.faculties[0]?.departments[0]?.id ?? '');
+      } else {
+        setSelectedUnivId('');
+        setSelectedFacultyId('');
+        setSelectedDeptId('');
       }
     }
   }

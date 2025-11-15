@@ -18,23 +18,4 @@ export type Department = { id: string; name: string; weights: Weights };
 export type Faculty = { id: string; name: string; departments: Department[] };
 export type University = { id: string; name: string; faculties: Faculty[] };
 
-function makeDefaultWeights(): Weights {
-  return SUBJECTS.reduce((acc, s) => {
-    acc[s.key] = 100 / SUBJECTS.length;
-    return acc;
-  }, {} as Weights);
-}
-
-export const DEFAULT_UNIVERSITIES: University[] = [
-  {
-    id: 'default',
-    name: '標準（等配点）',
-    faculties: [
-      {
-        id: 'default_main',
-        name: '学部',
-        departments: [{ id: 'default_main_main', name: '学科', weights: makeDefaultWeights() }],
-      },
-    ],
-  },
-];
+export const DEFAULT_UNIVERSITIES: University[] = [];
