@@ -48,10 +48,6 @@ jobs:
             echo "Unable to determine package manager"
             exit 1
           fi
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -68,13 +64,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
       - name: Build with Next.js
         env:
           BUILD_MODE: production
           NEXT_PUBLIC_IS_PRODUCTION_BUILD: 'true'
           NEXT_PUBLIC_BASE_PATH: 'Pyxis-CodeCanvas'
-        run: pnpm run build
+        run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
