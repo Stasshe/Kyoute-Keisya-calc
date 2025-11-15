@@ -269,7 +269,7 @@ export default function Calculator() {
                 <div className="text-xs opacity-90 mb-0.5">換算後得点</div>
                 <div className="text-3xl font-bold">{total}</div>
                 <div className="text-xs opacity-80 mt-1">
-                  傾斜配点達成率 <span className="font-medium">{maxTotal ? `${percent}%` : '—'}</span>
+                  <span className="font-medium">/{maxTotal}点, {maxTotal ? `${percent}%` : '—'}</span>
                 </div>
               </div>
               <div className="text-right text-xs opacity-90 max-w-[60%]">
