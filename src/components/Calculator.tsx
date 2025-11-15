@@ -334,7 +334,6 @@ export default function Calculator() {
                   setSelectedUnivId(univId);
                   setSelectedFacultyId(facId);
                   setSelectedDeptId(deptId);
-                  setActiveTab('input');
                 }}
                 onSetEditingDept={p => setEditingDept(p)}
                 onEditUniversity={u => setEditingUniversity(u)}
