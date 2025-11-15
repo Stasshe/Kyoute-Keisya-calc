@@ -33,9 +33,7 @@ export const DEFAULT_UNIVERSITIES: University[] = [
       {
         id: 'default_main',
         name: '学部',
-        departments: [
-          { id: 'default_main_main', name: '学科', weights: makeDefaultWeights() },
-        ],
+        departments: [{ id: 'default_main_main', name: '学科', weights: makeDefaultWeights() }],
       },
     ],
   },
