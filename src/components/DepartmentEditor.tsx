@@ -24,6 +24,9 @@ export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: P
 
       <div className="mb-3">
         <div className="text-xs font-medium text-gray-700 mb-2">配点設定</div>
+        <div className="text-xs text-gray-500 mb-2">
+          大学が公表している、共通テスト傾斜配点後の満点の値を入力してください。2科目目の教科（②）や情報を考慮に入れない場合は0点、または空欄にしてください。
+        </div>
         <div className="grid grid-cols-2 gap-2">
           {SUBJECTS.map(s => (
             <div key={s.key} className="bg-gray-50 p-2 rounded border">
