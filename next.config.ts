@@ -15,7 +15,7 @@ const commonConfig = {
     unoptimized: true, // 静的エクスポートでは必須
   },
   env: {
-    NEXT_PUBLIC_IS_PRODUCTION_BUILD: isProductionBuild,
+    NEXT_PUBLIC_IS_PRODUCTION_BUILD: String(isProductionBuild),
     NEXT_PUBLIC_BASE_PATH: basePathEnv,
   },
   // 開発環境と本番環境の共通設定
