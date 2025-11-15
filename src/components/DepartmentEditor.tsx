@@ -29,15 +29,23 @@ export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: P
             <div key={s.key} className="bg-gray-50 p-2 rounded border">
               <label className="block text-xs text-gray-600 mb-1">{s.label}</label>
               <input
-                type="number"
-                inputMode="numeric"
+                type="text"
+                inputMode="decimal"
                 className="w-full px-2 py-1.5 text-sm border rounded-md focus:ring-2 focus:ring-blue-500"
-                value={String(temp.weights[s.key] ?? 0)}
+                value={temp.weights[s.key] == null ? '' : String(temp.weights[s.key])}
                 onChange={e => {
-                  const nv = Number.isFinite(parseFloat(e.target.value))
-                    ? parseFloat(e.target.value)
-                    : 0;
-                  onChange({ ...temp, weights: { ...temp.weights, [s.key]: nv } });
+                  const v = e.target.value;
+                  if (v === '') {
+                    onChange({ ...temp, weights: { ...temp.weights, [s.key]: null } });
+                    return;
+                  }
+                  const parsed = parseFloat(v);
+                  if (Number.isFinite(parsed)) {
+                    onChange({ ...temp, weights: { ...temp.weights, [s.key]: parsed } });
+                  } else {
+                    // when input isn't a valid number, set null so user can correct
+                    onChange({ ...temp, weights: { ...temp.weights, [s.key]: null } });
+                  }
                 }}
               />
             </div>

@@ -117,7 +117,8 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
   }
 
   function updateDeptWeight(facId: string, deptId: string, key: string, value: string) {
-    const n = parseFloat(value);
+    const v = value;
+    const n = parseFloat(v);
     setUniv(u => ({
       ...u,
       faculties: u.faculties.map(f =>
@@ -126,7 +127,13 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
               ...f,
               departments: f.departments.map(d =>
                 d.id === deptId
-                  ? { ...d, weights: { ...d.weights, [key]: Number.isFinite(n) ? n : 0 } }
+                  ? {
+                      ...d,
+                      weights: {
+                        ...d.weights,
+                        [key]: v === '' ? null : Number.isFinite(n) ? n : null,
+                      },
+                    }
                   : d
               ),
             }
@@ -234,9 +241,9 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
                             <div key={s.key} className="bg-gray-50 p-2 rounded border">
                               <label className="block text-xs text-gray-600 mb-1">{s.label}</label>
                               <input
-                                type="number"
-                                inputMode="numeric"
-                                value={String(d.weights[s.key] ?? 0)}
+                                type="text"
+                                inputMode="decimal"
+                                value={d.weights[s.key] == null ? '' : String(d.weights[s.key])}
                                 onChange={e => updateDeptWeight(f.id, d.id, s.key, e.target.value)}
                                 className="w-full px-2 py-1.5 text-sm border rounded bg-white"
                               />

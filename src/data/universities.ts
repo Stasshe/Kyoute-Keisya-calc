@@ -1,4 +1,4 @@
-export type Weights = Record<string, number>;
+export type Weights = Record<string, number | null>;
 
 export const SUBJECTS = [
   { key: 'social1', label: '社会①', max: 100 },
