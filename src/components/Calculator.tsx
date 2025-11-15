@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, GraduationCap } from 'lucide-react';
+import { Award, FileText, GraduationCap } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -14,6 +14,7 @@ import {
 
 import ScoresTab from './Tab/ScoresTab';
 import UniversityTab from './Tab/UniversityTab';
+import ResultsTab from './Tab/resultTab';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';
@@ -27,7 +28,7 @@ function safeNumber(v: string) {
 }
 
 export default function Calculator() {
-  const [activeTab, setActiveTab] = useState<'input' | 'list'>('input');
+  const [activeTab, setActiveTab] = useState<'input' | 'list' | 'result'>('input');
   const [scores, setScores] = useState<Record<string, number>>(() => {
     try {
       const raw = localStorage.getItem(LS_SCORES);
@@ -273,14 +274,27 @@ export default function Calculator() {
               大学選択
             </span>
           </button>
+          <button
+            onClick={() => setActiveTab('result')}
+            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === 'result'
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            <span className="inline-flex items-center gap-2 justify-center">
+              <Award className="w-4 h-4" />
+              結果
+            </span>
+          </button>
         </div>
       </div>
 
       {/* コンテンツエリア */}
       <div className="pb-4">
-        {activeTab === 'input' ? (
-          <ScoresTab scores={scores} updateScore={updateScore} />
-        ) : (
+        {activeTab === 'input' && <ScoresTab scores={scores} updateScore={updateScore} />}
+
+        {activeTab === 'list' && (
           <div className="p-3">
             <UniversityTab
               universities={universities}
@@ -368,6 +382,19 @@ export default function Calculator() {
                 setEditingUniversity(null);
               }}
               onCancelEditUniversity={() => setEditingUniversity(null)}
+            />
+          </div>
+        )}
+
+        {activeTab === 'result' && (
+          <div className="p-3">
+            <ResultsTab
+              scores={scores}
+              department={selected.department!}
+              universityName={selected.university?.name ?? ''}
+              facultyName={selected.faculty?.name ?? ''}
+              departmentName={selected.department?.name ?? ''}
+              total={total}
             />
           </div>
         )}

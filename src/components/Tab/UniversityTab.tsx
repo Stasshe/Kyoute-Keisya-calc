@@ -2,8 +2,8 @@
 
 import { Department, University } from '@/data/universities';
 
-import UniversityEditor from './UniversityEditor';
-import UniversityList from './UniversityList';
+import UniversityEditor from '../UniversityEditor';
+import UniversityList from '../UniversityList';
 
 type EditingDept = null | { univId: string; facId: string; deptId: string; temp: Department };
 
@@ -53,7 +53,7 @@ export default function UniversityTab({
       {editingUniversity ? (
         <UniversityEditor
           initialUniversity={editingUniversity}
-          onSave={u => onSaveUniversity(u)}
+          onSave={(u: University) => onSaveUniversity(u)}
           onCancel={onCancelEditUniversity}
         />
       ) : (
