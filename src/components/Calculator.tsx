@@ -1,7 +1,7 @@
 'use client';
 
 import { Award, FileText, GraduationCap } from 'lucide-react';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   DEFAULT_UNIVERSITIES,
@@ -414,7 +414,6 @@ export default function Calculator() {
                 department={selected.department}
                 universityName={selected.university.name}
                 facultyName={selected.faculty.name}
-                departmentName={selected.department.name}
                 total={total}
               />
             </div>

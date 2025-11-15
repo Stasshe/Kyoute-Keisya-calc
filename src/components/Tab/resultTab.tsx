@@ -35,7 +35,6 @@ export default function ResultsTab({
   department,
   universityName,
   facultyName,
-  departmentName,
   total,
 }: Props) {
   // 教科ごとの詳細データを計算
@@ -66,7 +65,9 @@ export default function ResultsTab({
   }, [scores]);
 
   const maxPossible = useMemo(() => {
-    return SUBJECTS.reduce((sum, s) => sum + s.max, 0);
+    // 全体の満点は学科（文系/理系）によって変わるが
+    // アプリ仕様として合計は固定で1000点にする
+    return 1000;
   }, []);
 
   const totalPercentage = useMemo(() => {
@@ -78,8 +79,8 @@ export default function ResultsTab({
     const categories = {
       humanities: { name: '文系科目', subjects: ['social1', 'social2', 'japanese'], total: 0, weighted: 0 },
       science: { name: '理系科目', subjects: ['sci1', 'sci2', 'math1', 'math2'], total: 0, weighted: 0 },
-      language: { name: '語学', subjects: ['engR', 'engL'], total: 0, weighted: 0 },
-      other: { name: '情報', subjects: ['info'], total: 0, weighted: 0 },
+      language: { name: '英語', subjects: ['engR', 'engL'], total: 0, weighted: 0 },
+      three: { name: '3科目', subjects: ['engR','engL','japanease','math1','math2'],total: 0, weighted: 0}
     };
 
     Object.entries(categories).forEach(([_, cat]) => {
@@ -150,12 +151,6 @@ export default function ResultsTab({
             / {maxPossible}点 ({Math.round(totalPercentage)}%)
           </div>
         </div>
-      </div>
-
-      {/* 選択中の学科 */}
-      <div className="bg-white rounded-lg border p-3 shadow-sm">
-        <div className="text-xs text-gray-500 mb-1">選択中の学科</div>
-        <div className="font-medium text-gray-900">{departmentName}</div>
       </div>
 
       {/* 分野別得点 */}
