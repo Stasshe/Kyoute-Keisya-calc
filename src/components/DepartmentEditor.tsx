@@ -1,6 +1,7 @@
 'use client';
 
 import { Department, SUBJECTS } from '@/data/universities';
+import { useEffect, useState } from 'react';
 
 type Props = {
   temp: Department;
@@ -10,6 +11,24 @@ type Props = {
 };
 
 export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: Props) {
+  const [strWeights, setStrWeights] = useState<Record<string, string>>(() => {
+    const out: Record<string, string> = {};
+    SUBJECTS.forEach(s => {
+      const v = (temp.weights as Record<string, any>)[s.key];
+      out[s.key] = v == null ? '' : String(v);
+    });
+    return out;
+  });
+
+  useEffect(() => {
+    const out: Record<string, string> = {};
+    SUBJECTS.forEach(s => {
+      const v = (temp.weights as Record<string, any>)[s.key];
+      out[s.key] = v == null ? '' : String(v);
+    });
+    setStrWeights(out);
+  }, [temp]);
+
   return (
     <div className="p-3 bg-white border-2 border-blue-500 rounded-lg shadow-lg">
       <div className="mb-3">
@@ -35,19 +54,21 @@ export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: P
                 type="text"
                 inputMode="decimal"
                 className="w-full px-2 py-1.5 text-sm border rounded-md focus:ring-2 focus:ring-blue-500"
-                value={temp.weights[s.key] == null ? '' : String(temp.weights[s.key])}
+                value={strWeights[s.key] ?? ''}
                 onChange={e => {
                   const v = e.target.value;
+                  setStrWeights(prev => ({ ...prev, [s.key]: v }));
+
                   if (v === '') {
                     onChange({ ...temp, weights: { ...temp.weights, [s.key]: null } });
                     return;
                   }
+
                   const parsed = parseFloat(v);
+                  // Only commit numeric value when parseFloat yields a finite number.
+                  // This preserves intermediate inputs such as '.' or '1.' in the UI.
                   if (Number.isFinite(parsed)) {
                     onChange({ ...temp, weights: { ...temp.weights, [s.key]: parsed } });
-                  } else {
-                    // when input isn't a valid number, set null so user can correct
-                    onChange({ ...temp, weights: { ...temp.weights, [s.key]: null } });
                   }
                 }}
               />
