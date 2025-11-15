@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { University, Department } from '@/data/universities';
+import { Department, University } from '@/data/universities';
 import DepartmentEditor from './DepartmentEditor';
 
 type Props = {

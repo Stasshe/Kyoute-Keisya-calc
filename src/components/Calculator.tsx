@@ -8,9 +8,9 @@ import {
   Weights,
 } from '@/data/universities';
 import { useEffect, useMemo, useState } from 'react';
+import DepartmentEditor from './DepartmentEditor';
 import UniversityEditor from './UniversityEditor';
 import UniversityList from './UniversityList';
-import DepartmentEditor from './DepartmentEditor';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';

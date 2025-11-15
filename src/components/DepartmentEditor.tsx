@@ -1,7 +1,6 @@
 'use client';
 
 import { Department, SUBJECTS } from '@/data/universities';
-import React from 'react';
 
 type Props = {
   temp: Department;
