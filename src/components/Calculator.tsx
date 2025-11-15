@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_UNIVERSITIES, SUBJECTS, University, Weights } from '@/data/universities';
+import { DEFAULT_UNIVERSITIES, SUBJECTS, Weights, University, Department } from '@/data/universities';
 import { useEffect, useMemo, useState } from 'react';
 import UniversityEditor from './UniversityEditor';
 
@@ -40,6 +40,7 @@ export default function Calculator() {
   const [selectedDeptId, setSelectedDeptId] = useState<string>('');
 
   const [editing, setEditing] = useState<null | Univ>(null);
+  const [editingDept, setEditingDept] = useState<null | { univId: string; facId: string; deptId: string; temp: Department }>(null);
 
   useEffect(() => {
     localStorage.setItem(LS_SCORES, JSON.stringify(scores));
@@ -148,100 +149,156 @@ export default function Calculator() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-2">
-        <div className="bg-card border rounded-md p-4">
-          <h2 className="font-medium mb-3">点数入力</h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {SUBJECTS.map((s) => (
-              <div key={s.key} className="flex flex-col">
-                <label className="text-sm">{s.label}</label>
-                <input
-                  inputMode="numeric"
-                  value={scores[s.key] ?? ''}
-                  onChange={(e) => updateScore(s.key, e.target.value)}
-                  placeholder="空欄は0と見なします"
-                  className="mt-1 px-3 py-2 border rounded-md"
-                />
-                <span className="text-xs text-muted-foreground">満点: {s.max}</span>
-              </div>
-            ))}
+    <div className="space-y-6">
+      {/* Universities list - moved to top, vertical */}
+      <div className="bg-card border rounded-md p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-medium">大学リスト（上から順に選択）</h3>
+          <div className="flex gap-2">
+            <button onClick={addUniversity} className="text-sm px-2 py-1 border rounded-md">大学追加</button>
           </div>
         </div>
 
-        <div className="mt-4 flex gap-3">
-          <div className="flex-1 bg-card border rounded-md p-4">
-            <h3 className="text-sm font-medium mb-2">計算結果</h3>
-            <div className="text-3xl font-semibold">{total}</div>
-            <div className="text-sm text-muted-foreground mt-1">選択中: {selected?.university?.name ?? ''}</div>
-          </div>
+        <div className="space-y-3">
+          {universities.map((u) => (
+            <div key={u.id} className="border rounded p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedUnivId(u.id);
+                        const f = u.faculties[0];
+                        setSelectedFacultyId(f?.id ?? '');
+                        setSelectedDeptId(f?.departments[0]?.id ?? '');
+                      }}
+                      className="px-2 py-1 border rounded text-sm"
+                    >選択</button>
+                    <span className="font-medium">{u.name}</span>
+                    {!DEFAULT_UNIVERSITIES.some(d=>d.id===u.id) && (
+                      <button onClick={() => deleteUniversity(u.id)} className="px-2 py-1 border rounded text-sm text-destructive">削除</button>
+                    )}
+                  </div>
 
-          <div className="w-48 bg-card border rounded-md p-4 flex flex-col justify-between">
-            <div>
-              <h3 className="text-sm font-medium mb-2">保存</h3>
-              <p className="text-xs text-muted-foreground">入力は自動保存されます。</p>
+                  <div className="mt-2 space-y-2">
+                    {u.faculties.map(f=> (
+                      <div key={f.id} className="pl-4">
+                        <div className="flex items-center gap-2">
+                          <strong className="text-sm">{f.name}</strong>
+                          <button onClick={()=> { setSelectedUnivId(u.id); setSelectedFacultyId(f.id); const d = f.departments[0]; setSelectedDeptId(d?.id ?? ''); }} className="px-2 py-0.5 text-xs border rounded">学部選択</button>
+                          <button onClick={()=> { /* add department to this faculty */ const id = `dept_${Date.now()}`; setUniversities(prev=> prev.map(x=> x.id===u.id ? { ...x, faculties: x.faculties.map(ff=> ff.id===f.id ? { ...ff, departments: [...ff.departments, { id, name: '新しい学科', weights: SUBJECTS.reduce((acc,s)=>({ ...acc, [s.key]: 0 }), {} as Weights) }] } : ff) } : x)); }} className="px-2 py-0.5 text-xs border rounded">学科追加</button>
+                        </div>
+
+                        <div className="mt-1 grid grid-cols-2 gap-2">
+                          {f.departments.map(d=> (
+                            <div key={d.id} className="flex items-center justify-between gap-2 bg-white p-2 border rounded">
+                              <div className="flex items-center gap-2">
+                                <input type="radio" name="dept" checked={selectedDeptId===d.id && selectedUnivId===u.id} onChange={()=> { setSelectedUnivId(u.id); setSelectedFacultyId(f.id); setSelectedDeptId(d.id); }} />
+                                <span className="text-sm">{d.name}</span>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={()=> setEditingDept({ univId: u.id, facId: f.id, deptId: d.id, temp: { ...d } })} className="px-2 py-0.5 text-xs border rounded">編集</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="text-right">
-              <button
-                onClick={() => { setScores({}); localStorage.removeItem(LS_SCORES); }}
-                className="mt-2 px-3 py-2 border rounded-md text-sm"
-              >
-                クリア
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      <aside>
-        <div className="bg-card border rounded-md p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-medium">大学・配点設定</h3>
-            <button onClick={addUniversity} className="text-sm px-2 py-1 border rounded-md">追加</button>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <div className="bg-card border rounded-md p-4">
+            <h2 className="font-medium mb-3">点数入力</h2>
 
-          <div className="space-y-2">
-            <div className="mb-2">
-              <label className="text-xs">大学</label>
-              <select className="mt-1 w-full border rounded px-2 py-1" value={selectedUnivId} onChange={(e)=>setSelectedUnivId(e.target.value)}>
-                {universities.map(u=> <option key={u.id} value={u.id}>{u.name}</option>)}
-              </select>
-            </div>
-
-            <div className="mb-2">
-              <label className="text-xs">学部</label>
-              <select className="mt-1 w-full border rounded px-2 py-1" value={selectedFacultyId} onChange={(e)=>setSelectedFacultyId(e.target.value)}>
-                {universities.find(u=>u.id===selectedUnivId)?.faculties.map(f=> <option key={f.id} value={f.id}>{f.name}</option>)}
-              </select>
-            </div>
-
-            <div className="mb-2">
-              <label className="text-xs">学科</label>
-              <select className="mt-1 w-full border rounded px-2 py-1" value={selectedDeptId} onChange={(e)=>setSelectedDeptId(e.target.value)}>
-                {universities.find(u=>u.id===selectedUnivId)?.faculties.find(f=>f.id===selectedFacultyId)?.departments.map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={() => setEditing(universities.find(u=>u.id===selectedUnivId) ?? null)} className="px-2 py-1 border rounded text-sm">編集</button>
-              {!DEFAULT_UNIVERSITIES.some(d=>d.id===selectedUnivId) && (
-                <button onClick={() => deleteUniversity(selectedUnivId)} className="px-2 py-1 border rounded text-sm text-destructive">削除</button>
-              )}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {SUBJECTS.map((s) => (
+                <div key={s.key} className="flex flex-col">
+                  <label className="text-sm">{s.label}</label>
+                  <input
+                    inputMode="numeric"
+                    value={scores[s.key] ?? ''}
+                    onChange={(e) => updateScore(s.key, e.target.value)}
+                    placeholder="空欄は0と見なします"
+                    className="mt-1 px-3 py-2 border rounded-md"
+                  />
+                  <span className="text-xs text-muted-foreground">満点: {s.max}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {editing && (
-            <div className="mt-3">
-              <UniversityEditor
-                initialUniversity={editing}
-                onCancel={() => setEditing(null)}
-                onSave={(u) => saveUniversity(u)}
-              />
+          <div className="mt-4 flex gap-3">
+            <div className="flex-1 bg-card border rounded-md p-4">
+              <h3 className="text-sm font-medium mb-2">計算結果</h3>
+              <div className="text-3xl font-semibold">{total}</div>
+              <div className="text-sm text-muted-foreground mt-1">選択中: {selected?.university?.name ?? ''}</div>
             </div>
-          )}
+
+            <div className="w-48 bg-card border rounded-md p-4 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-medium mb-2">保存</h3>
+                <p className="text-xs text-muted-foreground">入力は自動保存されます。</p>
+              </div>
+              <div className="text-right">
+                <button
+                  onClick={() => { setScores({}); localStorage.removeItem(LS_SCORES); }}
+                  className="mt-2 px-3 py-2 border rounded-md text-sm"
+                >
+                  クリア
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </aside>
+
+        <div className="md:col-span-1">
+          <div className="bg-card border rounded-md p-4">
+            <h3 className="font-medium mb-2">編集 / 詳細</h3>
+            {editingDept ? (
+              <div>
+                <h4 className="font-medium mb-2">学科編集</h4>
+                <div className="mb-2">
+                  <label className="text-sm">学科名</label>
+                  <input className="mt-1 w-full px-2 py-1 border rounded" value={editingDept.temp.name} onChange={(e)=> setEditingDept(ed=> ed ? ({ ...ed, temp: { ...ed.temp, name: e.target.value } }) : ed)} />
+                </div>
+                <div className="grid grid-cols-2 gap-2 max-h-64 overflow-auto">
+                  {SUBJECTS.map(s=> (
+                    <div key={s.key}>
+                      <label className="text-xs">{s.label}</label>
+                      <input className="mt-1 w-full px-2 py-1 border rounded" value={String(editingDept.temp.weights[s.key] ?? 0)} onChange={(e)=> setEditingDept(ed=> ed ? ({ ...ed, temp: { ...ed.temp, weights: { ...ed.temp.weights, [s.key]: Number.isFinite(parseFloat(e.target.value)) ? parseFloat(e.target.value) : 0 } } }) : ed)} />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex gap-2 justify-end">
+                  <button onClick={()=> setEditingDept(null)} className="px-3 py-2 border rounded">キャンセル</button>
+                  <button onClick={()=> {
+                    if (!editingDept) return;
+                    setUniversities(prev=> prev.map(u=> {
+                      if (u.id !== editingDept.univId) return u;
+                      return { ...u, faculties: u.faculties.map(f=> {
+                        if (f.id !== editingDept.facId) return f;
+                        return { ...f, departments: f.departments.map(d=> d.id === editingDept.deptId ? { ...editingDept.temp } : d) };
+                      }) };
+                    }));
+                    setEditingDept(null);
+                  }} className="px-3 py-2 bg-primary text-primary-foreground rounded">保存</button>
+                </div>
+              </div>
+            ) : editing ? (
+              <UniversityEditor initialUniversity={editing} onCancel={() => setEditing(null)} onSave={(u) => saveUniversity(u)} />
+            ) : (
+              <div className="text-sm text-muted-foreground">大学または学科を選択して編集してください。</div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
