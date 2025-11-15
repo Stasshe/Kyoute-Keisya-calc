@@ -2,9 +2,10 @@
 
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { useState } from 'react';
-import GButton from './GButton';
 
 import { Faculty, SUBJECTS, University, Weights } from '@/data/universities';
+
+import GButton from './GButton';
 
 type Props = {
   initialUniversity: University;

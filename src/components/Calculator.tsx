@@ -1,5 +1,6 @@
 'use client';
 
+import { FileText, GraduationCap } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -11,9 +12,8 @@ import {
   Weights,
 } from '@/data/universities';
 
-import { FileText, GraduationCap } from 'lucide-react';
-import UniversityEditor from './UniversityEditor';
-import UniversityList from './UniversityList';
+import ScoresTab from './Tab/ScoresTab';
+import UniversityTab from './Tab/UniversityTab';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';
@@ -279,121 +279,96 @@ export default function Calculator() {
       {/* コンテンツエリア */}
       <div className="pb-4">
         {activeTab === 'input' ? (
-          <div className="p-3 space-y-2">
-            {SUBJECTS.map(s => (
-              <div key={s.key} className="bg-white rounded-lg border p-2.5 shadow-sm">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-sm font-medium text-gray-700">{s.label}</label>
-                  <span className="text-xs text-gray-500">/ {s.max}点</span>
-                </div>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  value={scores[s.key] ?? ''}
-                  onChange={e => updateScore(s.key, e.target.value)}
-                  placeholder="0"
-                  className="w-full px-3 py-2.5 text-base border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            ))}
-            <div className="text-xs text-gray-500 text-center pt-2">入力は自動保存されます</div>
-          </div>
+          <ScoresTab scores={scores} updateScore={updateScore} />
         ) : (
           <div className="p-3">
-            {editingUniversity ? (
-              <UniversityEditor
-                initialUniversity={editingUniversity}
-                onSave={u => {
-                  setUniversities(prev => prev.map(p => (p.id === u.id ? u : p)));
-                  setEditingUniversity(null);
-                }}
-                onCancel={() => setEditingUniversity(null)}
-              />
-            ) : (
-              <UniversityList
-                universities={universities}
-                selectedUnivId={selectedUnivId}
-                selectedDeptId={selectedDeptId}
-                editingDept={editingDept}
-                onAddUniversity={addUniversity}
-                onSelectUniversity={id => {
-                  setSelectedUnivId(id);
-                  const u = universities.find(x => x.id === id) || universities[0];
-                  const f = u?.faculties[0];
-                  setSelectedFacultyId(f?.id ?? '');
-                  setSelectedDeptId(f?.departments[0]?.id ?? '');
-                }}
-                onSelectFaculty={(univId, facId) => {
-                  setSelectedUnivId(univId);
-                  setSelectedFacultyId(facId);
-                  const u = universities.find(x => x.id === univId) || universities[0];
-                  const f = u?.faculties.find(ff => ff.id === facId) || u?.faculties[0];
-                  setSelectedDeptId(f?.departments[0]?.id ?? '');
-                }}
-                onSelectDept={(univId, facId, deptId) => {
-                  setSelectedUnivId(univId);
-                  setSelectedFacultyId(facId);
-                  setSelectedDeptId(deptId);
-                }}
-                onSetEditingDept={p => setEditingDept(p)}
-                onEditUniversity={u => setEditingUniversity(u)}
-                addDepartment={(univId, facId) => {
-                  const id = `dept_${Date.now()}`;
-                  setUniversities(prev =>
-                    prev.map(x =>
-                      x.id === univId
-                        ? {
-                            ...x,
-                            faculties: x.faculties.map(ff =>
-                              ff.id === facId
-                                ? {
-                                    ...ff,
-                                    departments: [
-                                      ...ff.departments,
-                                      {
-                                        id,
-                                        name: '新しい学科',
-                                        weights: SUBJECTS.reduce(
-                                          (acc, s) => ({ ...acc, [s.key]: 0 }),
-                                          {} as Weights
-                                        ),
-                                      },
-                                    ],
-                                  }
-                                : ff
-                            ),
-                          }
-                        : x
-                    )
-                  );
-                }}
-                deleteUniversity={id => deleteUniversity(id)}
-                deleteFaculty={(univId, facId) => deleteFaculty(univId, facId)}
-                deleteDepartment={(univId, facId, deptId) =>
-                  deleteDepartment(univId, facId, deptId)
-                }
-                saveDept={({ univId, facId, deptId, temp }) => {
-                  setUniversities(prev =>
-                    prev.map(u2 => {
-                      if (u2.id !== univId) return u2;
-                      return {
-                        ...u2,
-                        faculties: u2.faculties.map(f2 => {
-                          if (f2.id !== facId) return f2;
-                          return {
-                            ...f2,
-                            departments: f2.departments.map(d2 =>
-                              d2.id === deptId ? { ...temp } : d2
-                            ),
-                          };
-                        }),
-                      };
-                    })
-                  );
-                  setEditingDept(null);
-                }}
-              />
-            )}
+            <UniversityTab
+              universities={universities}
+              editingUniversity={editingUniversity}
+              editingDept={editingDept}
+              selectedUnivId={selectedUnivId}
+              selectedDeptId={selectedDeptId}
+              onAddUniversity={addUniversity}
+              onSelectUniversity={id => {
+                setSelectedUnivId(id);
+                const u = universities.find(x => x.id === id) || universities[0];
+                const f = u?.faculties[0];
+                setSelectedFacultyId(f?.id ?? '');
+                setSelectedDeptId(f?.departments[0]?.id ?? '');
+              }}
+              onSelectFaculty={(univId, facId) => {
+                setSelectedUnivId(univId);
+                setSelectedFacultyId(facId);
+                const u = universities.find(x => x.id === univId) || universities[0];
+                const f = u?.faculties.find(ff => ff.id === facId) || u?.faculties[0];
+                setSelectedDeptId(f?.departments[0]?.id ?? '');
+              }}
+              onSelectDept={(univId, facId, deptId) => {
+                setSelectedUnivId(univId);
+                setSelectedFacultyId(facId);
+                setSelectedDeptId(deptId);
+              }}
+              onSetEditingDept={p => setEditingDept(p)}
+              onEditUniversity={u => setEditingUniversity(u)}
+              addDepartment={(univId, facId) => {
+                const id = `dept_${Date.now()}`;
+                setUniversities(prev =>
+                  prev.map(x =>
+                    x.id === univId
+                      ? {
+                          ...x,
+                          faculties: x.faculties.map(ff =>
+                            ff.id === facId
+                              ? {
+                                  ...ff,
+                                  departments: [
+                                    ...ff.departments,
+                                    {
+                                      id,
+                                      name: '新しい学科',
+                                      weights: SUBJECTS.reduce(
+                                        (acc, s) => ({ ...acc, [s.key]: 0 }),
+                                        {} as Weights
+                                      ),
+                                    },
+                                  ],
+                                }
+                              : ff
+                          ),
+                        }
+                      : x
+                  )
+                );
+              }}
+              deleteUniversity={id => deleteUniversity(id)}
+              deleteFaculty={(univId, facId) => deleteFaculty(univId, facId)}
+              deleteDepartment={(univId, facId, deptId) => deleteDepartment(univId, facId, deptId)}
+              saveDept={({ univId, facId, deptId, temp }) => {
+                setUniversities(prev =>
+                  prev.map(u2 => {
+                    if (u2.id !== univId) return u2;
+                    return {
+                      ...u2,
+                      faculties: u2.faculties.map(f2 => {
+                        if (f2.id !== facId) return f2;
+                        return {
+                          ...f2,
+                          departments: f2.departments.map(d2 =>
+                            d2.id === deptId ? { ...temp } : d2
+                          ),
+                        };
+                      }),
+                    };
+                  })
+                );
+                setEditingDept(null);
+              }}
+              onSaveUniversity={u => {
+                setUniversities(prev => prev.map(p => (p.id === u.id ? u : p)));
+                setEditingUniversity(null);
+              }}
+              onCancelEditUniversity={() => setEditingUniversity(null)}
+            />
           </div>
         )}
       </div>

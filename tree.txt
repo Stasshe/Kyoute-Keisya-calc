@@ -1,9 +1,7 @@
 .
-├── Development
-│   ├── QUICK_REFERENCE.md
-│   └── README.md
 ├── README.md
 ├── SPECIFICATION.md
+├── TODO.md
 ├── eslint.config.mjs
 ├── next-env.d.ts
 ├── next.config.ts
@@ -22,20 +20,29 @@
 │   │   ├── layout.tsx
 │   │   └── page.tsx
 │   ├── components
-│   │   └── ThemeToggle.tsx
-│   └── contexts
-│       └── ThemeContext.tsx
+│   │   ├── Calculator.tsx
+│   │   ├── DepartmentEditor.tsx
+│   │   ├── GButton.tsx
+│   │   ├── Modal.tsx
+│   │   ├── Tab
+│   │   │   ├── ScoresTab.tsx
+│   │   │   └── UniversityTab.tsx
+│   │   ├── UniversityEditor.tsx
+│   │   └── UniversityList.tsx
+│   └── data
+│       └── universities.ts
 ├── tailwind.config.ts
 ├── tree.sh
 ├── tree.txt
-└── tsconfig.json
+├── tsconfig.json
+└── tsconfig.tsbuildinfo
 
-7 directories, 24 files
+7 directories, 31 files
 
 src/*.ts, *.tsx の統計:
-合計行数: 263
-合計文字数: 8478
-合計ファイルサイズ(bytes): 8880
+合計行数: 1270
+合計文字数: 44620
+合計ファイルサイズ(bytes): 45414
 
 開発環境の容量:
-655M	.
+701M	.

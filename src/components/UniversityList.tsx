@@ -2,11 +2,11 @@
 
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import GButton from './GButton';
 
 import { Department, University } from '@/data/universities';
 
 import DepartmentEditor from './DepartmentEditor';
+import GButton from './GButton';
 import Modal from './Modal';
 
 type Props = {
