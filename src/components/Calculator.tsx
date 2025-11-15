@@ -134,15 +134,15 @@ export default function Calculator() {
     const id = `custom_${Date.now()}`;
     const newU: Univ = {
       id,
-      name: '新しい大学',
+      name: '大阪大学',
       faculties: [
         {
           id: `${id}_fac1`,
-          name: '学部',
+          name: '工学部',
           departments: [
             {
               id: `${id}_fac1_dept1`,
-              name: '学科',
+              name: '地球総合学科',
               weights: SUBJECTS.reduce((acc, s) => ({ ...acc, [s.key]: 0 }), {} as Weights),
             },
           ],

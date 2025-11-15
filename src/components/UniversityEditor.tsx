@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import GButton from './GButton';
 
 import { Faculty, SUBJECTS, University, Weights } from '@/data/universities';
 
@@ -88,6 +89,8 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
           : f
       ),
     }));
+    // expand the newly targeted faculty so the user sees the new department
+    setExpandedFacs(prev => new Set([...Array.from(prev), facId]));
   }
 
   function deleteDepartment(facId: string, deptId: string) {
@@ -175,7 +178,7 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
                     />
                   </div>
                   <div className="flex gap-1 ml-2">
-                    <button
+                    <GButton
                       onClick={e => {
                         e.stopPropagation();
                         addDepartment(f.id);
@@ -183,7 +186,7 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
                       className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
                     >
                       学科追加
-                    </button>
+                    </GButton>
                     <button
                       onClick={e => {
                         e.stopPropagation();

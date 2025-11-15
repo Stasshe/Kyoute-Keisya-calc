@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import GButton from './GButton';
 
 import { Department, University } from '@/data/universities';
 
@@ -70,12 +71,12 @@ export default function UniversityList({
 
   return (
     <div className="space-y-2">
-      <button
+      <GButton
         onClick={onAddUniversity}
         className="w-full py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
       >
         ➕ 大学を追加
-      </button>
+      </GButton>
 
       <div className="space-y-2">
         {universities.map(u => {
@@ -147,15 +148,19 @@ export default function UniversityList({
                             <span className="text-sm font-medium text-gray-800">{f.name}</span>
                           </div>
                           <div className="flex gap-1">
-                            <button
+                            <GButton
                               onClick={e => {
                                 e.stopPropagation();
+                                // Make sure the university and faculty accordions open so the new
+                                // department is visible immediately after creation.
+                                setExpandedUnivs(prev => new Set([...Array.from(prev), u.id]));
+                                setExpandedFacs(prev => new Set([...Array.from(prev), f.id]));
                                 addDepartment(u.id, f.id);
                               }}
                               className="px-2 py-0.5 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
                             >
                               学科追加
-                            </button>
+                            </GButton>
                             <button
                               onClick={e => {
                                 e.stopPropagation();
@@ -196,6 +201,11 @@ export default function UniversityList({
                                         className="w-4 h-4"
                                       />
                                       <span className="text-sm font-medium">{d.name}</span>
+                                      {isDeptSelected && (
+                                        <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                          選択中
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="flex gap-1">
                                       <button
