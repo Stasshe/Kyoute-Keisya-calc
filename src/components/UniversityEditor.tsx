@@ -149,7 +149,7 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
         <h2 className="text-lg font-bold">大学編集</h2>
       </div>
 
-      <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+      <div className="p-4 space-y-4">
         {/* 大学名 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">大学名</label>
