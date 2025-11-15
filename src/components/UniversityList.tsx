@@ -7,6 +7,7 @@ import GButton from './GButton';
 import { Department, University } from '@/data/universities';
 
 import DepartmentEditor from './DepartmentEditor';
+import Modal from './Modal';
 
 type Props = {
   universities: University[];
@@ -200,10 +201,6 @@ export default function UniversityList({
                           <div className="px-4 pb-2 space-y-1.5">
                             {f.departments.map(d => {
                               const isDeptSelected = selectedDeptId === d.id && isSelected;
-                              const isEditing =
-                                editingDept?.univId === u.id &&
-                                editingDept?.facId === f.id &&
-                                editingDept?.deptId === d.id;
 
                               return (
                                 <div key={d.id} className="space-y-1.5">
@@ -264,16 +261,7 @@ export default function UniversityList({
                                     </div>
                                   </div>
 
-                                  {isEditing && (
-                                    <DepartmentEditor
-                                      temp={editingDept.temp}
-                                      onChange={(t: Department) =>
-                                        onSetEditingDept({ ...editingDept, temp: t })
-                                      }
-                                      onCancel={() => onSetEditingDept(null)}
-                                      onSave={() => saveDept(editingDept)}
-                                    />
-                                  )}
+                                  {/* 編集はモーダルで表示するため、ここではインラインレンダリングしない */}
                                 </div>
                               );
                             })}
@@ -288,6 +276,16 @@ export default function UniversityList({
           );
         })}
       </div>
+      {editingDept && (
+        <Modal onClose={() => onSetEditingDept(null)}>
+          <DepartmentEditor
+            temp={editingDept.temp}
+            onChange={(t: Department) => onSetEditingDept({ ...editingDept, temp: t })}
+            onCancel={() => onSetEditingDept(null)}
+            onSave={() => saveDept(editingDept)}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
