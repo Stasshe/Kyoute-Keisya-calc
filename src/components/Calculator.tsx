@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_UNIVERSITIES, SUBJECTS, Weights, University, Department } from '@/data/universities';
+import { DEFAULT_UNIVERSITIES, Department, SUBJECTS, University, Weights } from '@/data/universities';
 import { useEffect, useMemo, useState } from 'react';
 import UniversityEditor from './UniversityEditor';
 
@@ -191,14 +191,48 @@ export default function Calculator() {
 
                         <div className="mt-1 grid grid-cols-2 gap-2">
                           {f.departments.map(d=> (
-                            <div key={d.id} className="flex items-center justify-between gap-2 bg-white p-2 border rounded">
-                              <div className="flex items-center gap-2">
-                                <input type="radio" name="dept" checked={selectedDeptId===d.id && selectedUnivId===u.id} onChange={()=> { setSelectedUnivId(u.id); setSelectedFacultyId(f.id); setSelectedDeptId(d.id); }} />
-                                <span className="text-sm">{d.name}</span>
+                            <div key={d.id} className="flex flex-col gap-2">
+                              <div className="flex items-center justify-between gap-2 bg-white p-2 border rounded">
+                                <div className="flex items-center gap-2">
+                                  <input type="radio" name="dept" checked={selectedDeptId===d.id && selectedUnivId===u.id} onChange={()=> { setSelectedUnivId(u.id); setSelectedFacultyId(f.id); setSelectedDeptId(d.id); }} />
+                                  <span className="text-sm">{d.name}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                  <button onClick={()=> setEditingDept({ univId: u.id, facId: f.id, deptId: d.id, temp: { ...d } })} className="px-2 py-0.5 text-xs border rounded">編集</button>
+                                </div>
                               </div>
-                              <div className="flex gap-2">
-                                <button onClick={()=> setEditingDept({ univId: u.id, facId: f.id, deptId: d.id, temp: { ...d } })} className="px-2 py-0.5 text-xs border rounded">編集</button>
-                              </div>
+
+                              {/* Inline editor under the department when editing */}
+                              {editingDept && editingDept.univId === u.id && editingDept.facId === f.id && editingDept.deptId === d.id && (
+                                <div className="mt-2 p-3 bg-card border rounded">
+                                  <div className="mb-2">
+                                    <label className="text-xs">学科名</label>
+                                    <input value={editingDept.temp.name} onChange={(e)=> setEditingDept(ed=> ed ? ({ ...ed, temp: { ...ed.temp, name: e.target.value } }) : ed)} className="mt-1 w-full px-2 py-1 border rounded" />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {SUBJECTS.map(s=> (
+                                      <div key={s.key}>
+                                        <label className="text-xs">{s.label}</label>
+                                        <input className="mt-1 w-full px-2 py-1 border rounded" value={String(editingDept.temp.weights[s.key] ?? 0)} onChange={(e)=> setEditingDept(ed=> ed ? ({ ...ed, temp: { ...ed.temp, weights: { ...ed.temp.weights, [s.key]: Number.isFinite(parseFloat(e.target.value)) ? parseFloat(e.target.value) : 0 } } }) : ed)} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <div className="mt-3 flex gap-2 justify-end">
+                                    <button onClick={()=> setEditingDept(null)} className="px-3 py-1 border rounded text-sm">キャンセル</button>
+                                    <button onClick={()=> {
+                                      if (!editingDept) return;
+                                      setUniversities(prev=> prev.map(u2=> {
+                                        if (u2.id !== editingDept.univId) return u2;
+                                        return { ...u2, faculties: u2.faculties.map(f2=> {
+                                          if (f2.id !== editingDept.facId) return f2;
+                                          return { ...f2, departments: f2.departments.map(d2=> d2.id === editingDept.deptId ? { ...editingDept.temp } : d2) };
+                                        }) };
+                                      }));
+                                      setEditingDept(null);
+                                    }} className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm">保存</button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
