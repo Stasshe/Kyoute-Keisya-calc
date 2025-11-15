@@ -37,32 +37,4 @@ export const DEFAULT_UNIVERSITIES: University[] = [
       },
     ],
   },
-  {
-    id: 'osaka',
-    name: '大阪大学（例）',
-    faculties: [
-      {
-        id: 'osaka_general',
-        name: '学部',
-        departments: [
-          {
-            id: 'osaka_general_main',
-            name: '学科',
-            weights: {
-              social1: 10,
-              social2: 0,
-              japanese: 40,
-              engR: 37.5,
-              engL: 12.5,
-              sci1: 0,
-              sci2: 0,
-              math1: 0,
-              math2: 0,
-              info: 0,
-            },
-          },
-        ],
-      },
-    ],
-  },
 ];
