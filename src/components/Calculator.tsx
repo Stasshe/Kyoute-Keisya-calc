@@ -148,6 +148,18 @@ export default function Calculator() {
     return Math.round(sum * 100) / 100;
   }, [scores, selected]);
 
+  // 最大配点の合計と、現在どれだけ取れているか(%)を計算
+  const maxTotal = useMemo(() => {
+    const dept = selected?.department;
+    if (!dept) return 0;
+    return SUBJECTS.reduce((acc, s) => acc + Number(dept.weights[s.key] ?? 0), 0);
+  }, [selected]);
+
+  const percent = useMemo(() => {
+    if (!maxTotal) return 0;
+    return Math.round((total / maxTotal) * 1000) / 10; // 小数1位まで
+  }, [total, maxTotal]);
+
   function updateScore(key: string, value: string) {
     setScores(s => ({ ...s, [key]: safeNumber(value) }));
   }
@@ -256,6 +268,9 @@ export default function Calculator() {
               <div>
                 <div className="text-xs opacity-90 mb-0.5">換算後得点</div>
                 <div className="text-3xl font-bold">{total}</div>
+                <div className="text-xs opacity-80 mt-1">
+                  傾斜配点達成率 <span className="font-medium">{maxTotal ? `${percent}%` : '—'}</span>
+                </div>
               </div>
               <div className="text-right text-xs opacity-90 max-w-[60%]">
                 <div className="truncate">{selected?.university?.name}</div>
