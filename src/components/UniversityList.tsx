@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GButton from './GButton';
 
 import { Department, University } from '@/data/universities';
@@ -42,7 +42,7 @@ export default function UniversityList({
   deleteDepartment,
   saveDept,
 }: Props) {
-  const [expandedUnivs, setExpandedUnivs] = useState<Set<string>>(new Set([selectedUnivId]));
+  const [expandedUnivs, setExpandedUnivs] = useState<Set<string>>(new Set());
   const [expandedFacs, setExpandedFacs] = useState<Set<string>>(new Set());
 
   function toggleUniv(id: string) {
@@ -68,6 +68,12 @@ export default function UniversityList({
       return next;
     });
   }
+
+  // If a non-default university becomes selected, ensure its accordion is opened.
+  useEffect(() => {
+    if (!selectedUnivId || selectedUnivId === 'default') return;
+    setExpandedUnivs(prev => new Set([...Array.from(prev), selectedUnivId]));
+  }, [selectedUnivId]);
 
   return (
     <div className="space-y-2">
