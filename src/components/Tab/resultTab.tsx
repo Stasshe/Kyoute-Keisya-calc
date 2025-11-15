@@ -35,7 +35,7 @@ export default function ResultsTab({
   department,
   universityName,
   facultyName,
-  departmentName
+  departmentName,
 }: Props) {
   // トグル状態: 'none' | 'social2' | 'sci2'
   const [ignoreSubject, setIgnoreSubject] = useState<'none' | 'social2' | 'sci2'>('none');
@@ -46,12 +46,12 @@ export default function ResultsTab({
 
     return SUBJECTS.map(s => {
       // 無視する教科の場合はスコアと配点を0にする
-      const shouldIgnore = 
+      const shouldIgnore =
         (ignoreSubject === 'social2' && s.key === 'social2') ||
         (ignoreSubject === 'sci2' && s.key === 'sci2');
 
-      const rawScore = shouldIgnore ? 0 : (Number(scores[s.key] ?? 0) || 0);
-      const weight = shouldIgnore ? 0 : (Number(department.weights[s.key] ?? 0) || 0);
+      const rawScore = shouldIgnore ? 0 : Number(scores[s.key] ?? 0) || 0;
+      const weight = shouldIgnore ? 0 : Number(department.weights[s.key] ?? 0) || 0;
       const percentage = s.max > 0 ? (rawScore / s.max) * 100 : 0;
       const weighted = s.max > 0 ? (rawScore / s.max) * weight : 0;
 
@@ -75,7 +75,7 @@ export default function ResultsTab({
 
   const maxPossible = useMemo(() => {
     return SUBJECTS.reduce((sum, s) => {
-      const shouldIgnore = 
+      const shouldIgnore =
         (ignoreSubject === 'social2' && s.key === 'social2') ||
         (ignoreSubject === 'sci2' && s.key === 'sci2');
       return sum + (shouldIgnore ? 0 : s.max);
@@ -94,13 +94,28 @@ export default function ResultsTab({
   // 分野別集計（文系・理系・その他）
   const categoryData = useMemo(() => {
     const categories = {
-      humanities: { name: '文系科目', subjects: ['social1', 'social2', 'japanese'], total: 0, weighted: 0 },
-      science: { name: '理系科目', subjects: ['sci1', 'sci2', 'math1', 'math2'], total: 0, weighted: 0 },
+      humanities: {
+        name: '文系科目',
+        subjects: ['social1', 'social2', 'japanese'],
+        total: 0,
+        weighted: 0,
+      },
+      science: {
+        name: '理系科目',
+        subjects: ['sci1', 'sci2', 'math1', 'math2'],
+        total: 0,
+        weighted: 0,
+      },
       language: { name: '英語', subjects: ['engR', 'engL'], total: 0, weighted: 0 },
-      three: { name: '3科目', subjects: ['engR','engL','japanease','math1','math2'],total: 0, weighted: 0}
+      three: {
+        name: '3科目',
+        subjects: ['engR', 'engL', 'japanease', 'math1', 'math2'],
+        total: 0,
+        weighted: 0,
+      },
     };
 
-    Object.entries(categories).forEach(([_, cat]) => {
+    Object.entries(categories).forEach(([, cat]) => {
       cat.subjects.forEach(key => {
         const detail = subjectDetails.find(d => d.key === key);
         if (detail) {
@@ -227,10 +242,10 @@ export default function ResultsTab({
           {categoryData.map((cat, idx) => {
             const maxCat = cat.subjects.reduce((sum, key) => {
               const subj = SUBJECTS.find(s => s.key === key);
-              const shouldIgnore = 
+              const shouldIgnore =
                 (ignoreSubject === 'social2' && key === 'social2') ||
                 (ignoreSubject === 'sci2' && key === 'sci2');
-              return sum + (shouldIgnore ? 0 : (subj?.max || 0));
+              return sum + (shouldIgnore ? 0 : subj?.max || 0);
             }, 0);
             const percentage = maxCat > 0 ? (cat.total / maxCat) * 100 : 0;
 
@@ -280,8 +295,8 @@ export default function ResultsTab({
             </thead>
             <tbody className="divide-y">
               {subjectDetails.map((s, idx) => (
-                <tr 
-                  key={idx} 
+                <tr
+                  key={idx}
                   className={`hover:bg-gray-50 ${s.isIgnored ? 'opacity-40 bg-gray-50' : ''}`}
                 >
                   <td className="px-3 py-2.5 font-medium text-gray-900">
@@ -297,10 +312,10 @@ export default function ResultsTab({
                         s.percentage >= 80
                           ? 'bg-green-100 text-green-700'
                           : s.percentage >= 60
-                          ? 'bg-blue-100 text-blue-700'
-                          : s.percentage >= 40
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-red-100 text-red-700'
+                            ? 'bg-blue-100 text-blue-700'
+                            : s.percentage >= 40
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
                       }`}
                     >
                       {Math.round(s.percentage)}%
@@ -402,15 +417,11 @@ export default function ResultsTab({
           <div className="text-amber-600 mt-0.5">💡</div>
           <div className="flex-1 text-xs text-gray-700 space-y-1">
             <p className="font-medium text-amber-900">得点アップのヒント</p>
-            {totalPercentage < 70 && (
-              <p>• 全体的な基礎力の底上げを目指しましょう</p>
-            )}
+            {totalPercentage < 70 && <p>• 全体的な基礎力の底上げを目指しましょう</p>}
             {subjectDetails.some(s => s.weight > 0 && s.percentage < 60 && !s.isIgnored) && (
               <p>• 配点が高い教科で得点率が低いものを優先的に対策しましょう</p>
             )}
-            {totalPercentage >= 80 && (
-              <p>• 素晴らしい成績です！この調子で本番も頑張りましょう</p>
-            )}
+            {totalPercentage >= 80 && <p>• 素晴らしい成績です！この調子で本番も頑張りましょう</p>}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "Kyoute-Keisya-Calc",
+  "short_name": "KyouteCalc",
   "description": "共テ傾斜配点計算ツール — 大学・学部のスコア計算と比較を行う Web アプリケーション",
   "icons": [
     {

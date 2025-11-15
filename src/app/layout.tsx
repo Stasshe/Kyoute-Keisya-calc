@@ -29,11 +29,9 @@ try {
 }
 
 export const metadata: Metadata = {
-  title: manifest.name || 'Create Next App',
+  title: manifest.name || '',
   description:
-    typeof manifest.description === 'string' && manifest.description
-      ? manifest.description
-      : '',
+    typeof manifest.description === 'string' && manifest.description ? manifest.description : '',
 };
 
 export default function RootLayout({

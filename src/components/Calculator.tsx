@@ -12,9 +12,9 @@ import {
   Weights,
 } from '@/data/universities';
 
+import ResultsTab from './Tab/resultTab';
 import ScoresTab from './Tab/ScoresTab';
 import UniversityTab from './Tab/UniversityTab';
-import ResultsTab from './Tab/resultTab';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';
