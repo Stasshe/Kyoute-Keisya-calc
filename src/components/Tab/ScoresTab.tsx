@@ -36,7 +36,16 @@ export default function ScoresTab({ scores, updateScore }: Props) {
         <br />
         サイト内の全ての入力データは、あなたの端末のブラウザ内に保存され、サーバーには一切送信されません。
         <br />
-        MITライセンスで提供されています。
+        MITライセンスで提供されています。{' '}
+        <a
+          href="https://github.com/Stasshe/Kyoute-Keisya-calc"
+          className="text-blue-600 underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHubリポジトリはこちら
+        </a>
+        。
         <br />
         © 2025 Stasshe/Roughfts. All rights reserved.
         <br />
