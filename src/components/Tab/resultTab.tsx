@@ -35,13 +35,13 @@ export default function ResultsTab({
   facultyName
 }: Props) {
   // トグル状態: 'none' | 'social2' | 'sci2'
-  const [ignoreSubject, setIgnoreSubject] = useState<'none' | 'social2' | 'sci2'>(() => {
+  const [ignoreSubject, setIgnoreSubject] = useState<'social2' | 'sci2'>(() => {
     try {
-      if (typeof window === 'undefined') return 'none';
+      if (typeof window === 'undefined') return 'social2';
       const v = localStorage.getItem('ignoreSubject');
-      return v === 'social2' || v === 'sci2' || v === 'none' ? (v as 'none' | 'social2' | 'sci2') : 'none';
+      return v === 'social2' || v === 'sci2' ? (v as 'social2' | 'sci2') : 'social2';
     } catch (e) {
-      return 'none';
+      return 'social2';
     }
   });
 
@@ -180,16 +180,6 @@ export default function ResultsTab({
       <div className="bg-white rounded-lg border shadow-sm p-3">
         <div className="text-xs text-gray-600 mb-2 font-medium">科目選択（どちらかを無視）</div>
         <div className="flex gap-2">
-          <button
-            onClick={() => setIgnoreSubject('none')}
-            className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
-              ignoreSubject === 'none'
-                ? 'bg-blue-500 text-white shadow-md'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            両方使う
-          </button>
           <button
             onClick={() => setIgnoreSubject('social2')}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
