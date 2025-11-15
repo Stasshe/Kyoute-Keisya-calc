@@ -12,6 +12,7 @@ import {
 } from '@/data/universities';
 
 import UniversityList from './UniversityList';
+import UniversityEditor from './UniversityEditor';
 
 const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';
@@ -47,13 +48,13 @@ export default function Calculator() {
   const [selectedUnivId, setSelectedUnivId] = useState<string>('');
   const [selectedFacultyId, setSelectedFacultyId] = useState<string>('');
   const [selectedDeptId, setSelectedDeptId] = useState<string>('');
-
   const [editingDept, setEditingDept] = useState<null | {
     univId: string;
     facId: string;
     deptId: string;
     temp: Department;
   }>(null);
+  const [editingUniversity, setEditingUniversity] = useState<null | University>(null);
 
   useEffect(() => {
     localStorage.setItem(LS_SCORES, JSON.stringify(scores));
@@ -233,7 +234,8 @@ export default function Calculator() {
           setSelectedFacultyId(facId);
           setSelectedDeptId(deptId);
         }}
-        
+        onSetEditingDept={p => setEditingDept(p)}
+        onEditUniversity={u => setEditingUniversity(u)}
         addDepartment={(univId, facId) => {
           const id = `dept_${Date.now()}`;
           setUniversities(prev =>
@@ -286,6 +288,19 @@ export default function Calculator() {
           setEditingDept(null);
         }}
       />
+
+      {editingUniversity && (
+        <div className="mt-4">
+          <UniversityEditor
+            initialUniversity={editingUniversity}
+            onSave={u => {
+              setUniversities(prev => prev.map(p => (p.id === u.id ? u : p)));
+              setEditingUniversity(null);
+            }}
+            onCancel={() => setEditingUniversity(null)}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">

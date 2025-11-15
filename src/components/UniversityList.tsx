@@ -71,7 +71,7 @@ export default function UniversityList({
                 <div className="mt-2 space-y-2">
                   {u.faculties.map(f => (
                     <div key={f.id} className="pl-4">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <strong className="text-sm">{f.name}</strong>
                         <button
                           onClick={() => onSelectFaculty(u.id, f.id)}
@@ -93,7 +93,7 @@ export default function UniversityList({
                         </button>
                       </div>
 
-                      <div className="mt-1 grid grid-cols-2 gap-2">
+                      <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {f.departments.map(d => (
                           <div key={d.id} className="flex flex-col gap-2">
                             <div className="flex items-center justify-between gap-2 bg-white p-2 border rounded">
@@ -153,7 +153,7 @@ export default function UniversityList({
 
               <div>
                 <div className="flex flex-col gap-2">
-                  {!['default', 'osaka'].includes(u.id) && (
+                  {u.id !== 'default' && (
                     <button
                       onClick={() => deleteUniversity(u.id)}
                       className="px-2 py-1 border rounded text-sm text-destructive"
