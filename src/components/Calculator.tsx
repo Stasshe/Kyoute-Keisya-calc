@@ -386,18 +386,21 @@ export default function Calculator() {
           </div>
         )}
 
-        {activeTab === 'result' && (
-          <div className="p-3">
-            <ResultsTab
-              scores={scores}
-              department={selected.department!}
-              universityName={selected.university?.name ?? ''}
-              facultyName={selected.faculty?.name ?? ''}
-              departmentName={selected.department?.name ?? ''}
-              total={total}
-            />
-          </div>
-        )}
+        {activeTab === 'result' &&
+          (selected.university && selected.faculty && selected.department ? (
+            <div className="p-3">
+              <ResultsTab
+                scores={scores}
+                department={selected.department}
+                universityName={selected.university.name}
+                facultyName={selected.faculty.name}
+                departmentName={selected.department.name}
+                total={total}
+              />
+            </div>
+          ) : (
+            <div className="p-3 text-center text-gray-500">大学・学部・学科を選択してください</div>
+          ))}
       </div>
     </div>
   );
