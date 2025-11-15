@@ -429,7 +429,6 @@ export default function Calculator() {
                 department={selected.department}
                 universityName={selected.university.name}
                 facultyName={selected.faculty.name}
-                total={total}
               />
             </div>
           ) : (

@@ -1,7 +1,7 @@
 'use client';
 
 import { Award, BarChart3, PieChart, TrendingUp } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -26,19 +26,33 @@ type Props = {
   department?: Department;
   universityName?: string;
   facultyName?: string;
-  departmentName?: string;
-  total: number;
 };
 
 export default function ResultsTab({
   scores,
   department,
   universityName,
-  facultyName,
-  departmentName,
+  facultyName
 }: Props) {
   // トグル状態: 'none' | 'social2' | 'sci2'
-  const [ignoreSubject, setIgnoreSubject] = useState<'none' | 'social2' | 'sci2'>('none');
+  const [ignoreSubject, setIgnoreSubject] = useState<'none' | 'social2' | 'sci2'>(() => {
+    try {
+      if (typeof window === 'undefined') return 'none';
+      const v = localStorage.getItem('ignoreSubject');
+      return v === 'social2' || v === 'sci2' || v === 'none' ? (v as 'none' | 'social2' | 'sci2') : 'none';
+    } catch (e) {
+      return 'none';
+    }
+  });
+
+  // ignoreSubject が変わったら localStorage に保存
+  useEffect(() => {
+    try {
+      localStorage.setItem('ignoreSubject', ignoreSubject);
+    } catch (e) {
+      // ignore write errors silently
+    }
+  }, [ignoreSubject]);
 
   // 教科ごとの詳細データを計算
   const subjectDetails = useMemo(() => {
@@ -222,12 +236,6 @@ export default function ResultsTab({
             / {maxPossible}点 ({Math.round(totalPercentage)}%)
           </div>
         </div>
-      </div>
-
-      {/* 選択中の学科 */}
-      <div className="bg-white rounded-lg border p-3 shadow-sm">
-        <div className="text-xs text-gray-500 mb-1">選択中の学科</div>
-        <div className="font-medium text-gray-900">{departmentName}</div>
       </div>
 
       {/* 分野別得点 */}
