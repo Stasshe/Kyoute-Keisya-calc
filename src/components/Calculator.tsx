@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_UNIVERSITIES, SUBJECTS, Weights } from '@/data/universities';
+import { DEFAULT_UNIVERSITIES, SUBJECTS, University, Weights } from '@/data/universities';
 import { useEffect, useMemo, useState } from 'react';
 import UniversityEditor from './UniversityEditor';
 
@@ -8,7 +8,7 @@ const LS_SCORES = 'kkc_scores_v1';
 const LS_SELECTED = 'kkc_selected_univ_v1';
 const LS_CUSTOM = 'kkc_custom_univs_v1';
 
-type Univ = { id: string; name: string; weights: Weights };
+type Univ = University;
 
 function safeNumber(v: string) {
   const n = parseFloat(v);
@@ -35,13 +35,9 @@ export default function Calculator() {
     }
   });
 
-  const [selectedId, setSelectedId] = useState<string>(() => {
-    try {
-      return localStorage.getItem(LS_SELECTED) || DEFAULT_UNIVERSITIES[0].id;
-    } catch {
-      return DEFAULT_UNIVERSITIES[0].id;
-    }
-  });
+  const [selectedUnivId, setSelectedUnivId] = useState<string>('');
+  const [selectedFacultyId, setSelectedFacultyId] = useState<string>('');
+  const [selectedDeptId, setSelectedDeptId] = useState<string>('');
 
   const [editing, setEditing] = useState<null | Univ>(null);
 
@@ -50,8 +46,16 @@ export default function Calculator() {
   }, [scores]);
 
   useEffect(() => {
-    localStorage.setItem(LS_SELECTED, selectedId);
-  }, [selectedId]);
+    localStorage.setItem(`${LS_SELECTED}_univ`, selectedUnivId);
+  }, [selectedUnivId]);
+
+  useEffect(() => {
+    localStorage.setItem(`${LS_SELECTED}_fac`, selectedFacultyId);
+  }, [selectedFacultyId]);
+
+  useEffect(() => {
+    localStorage.setItem(`${LS_SELECTED}_dept`, selectedDeptId);
+  }, [selectedDeptId]);
 
   useEffect(() => {
     // persist custom universities (exclude default ones by id)
@@ -59,14 +63,42 @@ export default function Calculator() {
     localStorage.setItem(LS_CUSTOM, JSON.stringify(customs));
   }, [universities]);
 
-  const selected = universities.find((u) => u.id === selectedId) ?? universities[0];
+  useEffect(() => {
+    // initialize selected ids from localStorage or defaults after universities load
+    const su = localStorage.getItem(`${LS_SELECTED}_univ`);
+    const sf = localStorage.getItem(`${LS_SELECTED}_fac`);
+    const sd = localStorage.getItem(`${LS_SELECTED}_dept`);
+
+    const firstUniv = universities[0];
+    if (su && universities.some(u=>u.id===su)) {
+      setSelectedUnivId(su);
+      const un = universities.find(u=>u.id===su)!;
+      const firstFac = un.faculties[0];
+      setSelectedFacultyId(sf && firstFac && firstFac.departments.some(d=>d.id===sd) ? sf : firstFac?.id ?? '');
+      const fac = un.faculties.find(f=>f.id=== (sf || firstFac?.id));
+      setSelectedDeptId(sd && fac && fac.departments.some(d=>d.id===sd) ? sd : fac?.departments[0]?.id ?? '');
+    } else if (firstUniv) {
+      setSelectedUnivId(firstUniv.id);
+      const f = firstUniv.faculties[0];
+      setSelectedFacultyId(f?.id ?? '');
+      setSelectedDeptId(f?.departments[0]?.id ?? '');
+    }
+  }, [universities]);
+
+  const selected = useMemo(()=>{
+    const u = universities.find((u) => u.id === selectedUnivId) ?? universities[0];
+    const fac = u?.faculties.find(f=>f.id===selectedFacultyId) ?? u?.faculties[0];
+    const dept = fac?.departments.find(d=>d.id===selectedDeptId) ?? fac?.departments[0];
+    return { university: u, faculty: fac, department: dept } as { university?: Univ; faculty?: any; department?: any };
+  }, [universities, selectedUnivId, selectedFacultyId, selectedDeptId]);
 
   const total = useMemo(() => {
-    if (!selected) return 0;
+    const dept = selected?.department;
+    if (!dept) return 0;
     let sum = 0;
     for (const s of SUBJECTS) {
       const val = Number(scores[s.key] ?? 0) || 0;
-      const w = Number(selected.weights[s.key] ?? 0) || 0;
+      const w = Number(dept.weights[s.key] ?? 0) || 0;
       sum += (val / s.max) * w;
     }
     return Math.round(sum * 100) / 100;
@@ -81,21 +113,38 @@ export default function Calculator() {
     const newU: Univ = {
       id,
       name: '新しい大学',
-      weights: SUBJECTS.reduce((acc, s) => ({ ...acc, [s.key]: 0 }), {} as Weights),
+      faculties: [
+        {
+          id: `${id}_fac1`,
+          name: '学部',
+          departments: [
+            { id: `${id}_fac1_dept1`, name: '学科', weights: SUBJECTS.reduce((acc, s) => ({ ...acc, [s.key]: 0 }), {} as Weights) },
+          ],
+        },
+      ],
     };
     setUniversities((u) => [ ...u, newU ]);
     setEditing(newU);
-    setSelectedId(id);
+    setSelectedUnivId(id);
+    setSelectedFacultyId(`${id}_fac1`);
+    setSelectedDeptId(`${id}_fac1_dept1`);
   }
 
-  function saveUniversity(id: string, name: string, weights: Weights) {
-    setUniversities((u) => u.map((x) => (x.id === id ? { id, name, weights } : x)));
+  function saveUniversity(univ: Univ) {
+    setUniversities((u) => u.map((x) => (x.id === univ.id ? univ : x)));
     setEditing(null);
   }
 
   function deleteUniversity(id: string) {
     setUniversities((u) => u.filter((x) => x.id !== id));
-    if (selectedId === id) setSelectedId(DEFAULT_UNIVERSITIES[0].id);
+    if (selectedUnivId === id) {
+      const first = universities.find(u=>u.id!==id) || DEFAULT_UNIVERSITIES[0];
+      if (first) {
+        setSelectedUnivId(first.id);
+        setSelectedFacultyId(first.faculties[0]?.id ?? '');
+        setSelectedDeptId(first.faculties[0]?.departments[0]?.id ?? '');
+      }
+    }
   }
 
   return (
@@ -125,7 +174,7 @@ export default function Calculator() {
           <div className="flex-1 bg-card border rounded-md p-4">
             <h3 className="text-sm font-medium mb-2">計算結果</h3>
             <div className="text-3xl font-semibold">{total}</div>
-            <div className="text-sm text-muted-foreground mt-1">選択中: {selected?.name}</div>
+            <div className="text-sm text-muted-foreground mt-1">選択中: {selected?.university?.name ?? ''}</div>
           </div>
 
           <div className="w-48 bg-card border rounded-md p-4 flex flex-col justify-between">
@@ -153,33 +202,41 @@ export default function Calculator() {
           </div>
 
           <div className="space-y-2">
-            {universities.map((u) => (
-              <div key={u.id} className={`flex items-center justify-between p-2 rounded ${u.id === selectedId ? 'bg-primary/5' : ''}`}>
-                <div>
-                  <label className="inline-flex items-center">
-                    <input type="radio" name="univ" checked={u.id === selectedId} onChange={() => setSelectedId(u.id)} className="mr-2" />
-                    <span className="font-medium">{u.name}</span>
-                  </label>
-                  <div className="text-xs text-muted-foreground">合計傾斜: {Math.round(Object.values(u.weights).reduce((a,b)=>a+(Number(b)||0),0)*100)/100}</div>
-                </div>
+            <div className="mb-2">
+              <label className="text-xs">大学</label>
+              <select className="mt-1 w-full border rounded px-2 py-1" value={selectedUnivId} onChange={(e)=>setSelectedUnivId(e.target.value)}>
+                {universities.map(u=> <option key={u.id} value={u.id}>{u.name}</option>)}
+              </select>
+            </div>
 
-                <div className="flex gap-2">
-                  <button onClick={() => setEditing(u)} className="px-2 py-1 border rounded text-sm">編集</button>
-                  {!DEFAULT_UNIVERSITIES.some(d=>d.id===u.id) && (
-                    <button onClick={() => deleteUniversity(u.id)} className="px-2 py-1 border rounded text-sm text-destructive">削除</button>
-                  )}
-                </div>
-              </div>
-            ))}
+            <div className="mb-2">
+              <label className="text-xs">学部</label>
+              <select className="mt-1 w-full border rounded px-2 py-1" value={selectedFacultyId} onChange={(e)=>setSelectedFacultyId(e.target.value)}>
+                {universities.find(u=>u.id===selectedUnivId)?.faculties.map(f=> <option key={f.id} value={f.id}>{f.name}</option>)}
+              </select>
+            </div>
+
+            <div className="mb-2">
+              <label className="text-xs">学科</label>
+              <select className="mt-1 w-full border rounded px-2 py-1" value={selectedDeptId} onChange={(e)=>setSelectedDeptId(e.target.value)}>
+                {universities.find(u=>u.id===selectedUnivId)?.faculties.find(f=>f.id===selectedFacultyId)?.departments.map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={() => setEditing(universities.find(u=>u.id===selectedUnivId) ?? null)} className="px-2 py-1 border rounded text-sm">編集</button>
+              {!DEFAULT_UNIVERSITIES.some(d=>d.id===selectedUnivId) && (
+                <button onClick={() => deleteUniversity(selectedUnivId)} className="px-2 py-1 border rounded text-sm text-destructive">削除</button>
+              )}
+            </div>
           </div>
 
           {editing && (
             <div className="mt-3">
               <UniversityEditor
-                initialName={editing.name}
-                initialWeights={editing.weights}
+                initialUniversity={editing}
                 onCancel={() => setEditing(null)}
-                onSave={(name, weights) => saveUniversity(editing.id, name, weights)}
+                onSave={(u) => saveUniversity(u)}
               />
             </div>
           )}

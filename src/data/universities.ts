@@ -13,30 +13,58 @@ export const SUBJECTS = [
   { key: 'info', label: '情報', max: 100 },
 ];
 
-// Example default universities. Weights are absolute numbers (実際の配点) used directly.
-export const DEFAULT_UNIVERSITIES: Array<{ id: string; name: string; weights: Weights }> = [
+// Hierarchical data: university -> faculties -> departments -> weights
+export type Department = { id: string; name: string; weights: Weights };
+export type Faculty = { id: string; name: string; departments: Department[] };
+export type University = { id: string; name: string; faculties: Faculty[] };
+
+function makeDefaultWeights(): Weights {
+  return SUBJECTS.reduce((acc, s) => {
+    acc[s.key] = 100 / SUBJECTS.length;
+    return acc;
+  }, {} as Weights);
+}
+
+export const DEFAULT_UNIVERSITIES: University[] = [
   {
     id: 'default',
     name: '標準（等配点）',
-    weights: SUBJECTS.reduce((acc, s) => {
-      acc[s.key] = 100 / SUBJECTS.length; // distribute 100 equally
-      return acc;
-    }, {} as Weights),
+    faculties: [
+      {
+        id: 'default_main',
+        name: '学部',
+        departments: [
+          { id: 'default_main_main', name: '学科', weights: makeDefaultWeights() },
+        ],
+      },
+    ],
   },
   {
     id: 'osaka',
     name: '大阪大学（例）',
-    weights: {
-      social1: 10,
-      social2: 0,
-      japanese: 40,
-      engR: 37.5,
-      engL: 12.5,
-      sci1: 0,
-      sci2: 0,
-      math1: 0,
-      math2: 0,
-      info: 0,
-    },
+    faculties: [
+      {
+        id: 'osaka_general',
+        name: '学部',
+        departments: [
+          {
+            id: 'osaka_general_main',
+            name: '学科',
+            weights: {
+              social1: 10,
+              social2: 0,
+              japanese: 40,
+              engR: 37.5,
+              engL: 12.5,
+              sci1: 0,
+              sci2: 0,
+              math1: 0,
+              math2: 0,
+              info: 0,
+            },
+          },
+        ],
+      },
+    ],
   },
 ];
