@@ -19,12 +19,18 @@ export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: P
     });
     return out;
   });
+  const [focused, setFocused] = useState<Record<string, boolean>>(() => {
+    const out: Record<string, boolean> = {};
+    SUBJECTS.forEach(s => (out[s.key] = false));
+    return out;
+  });
 
   useEffect(() => {
     const out: Record<string, string> = {};
     SUBJECTS.forEach(s => {
       const v = (temp.weights as Record<string, any>)[s.key];
-      out[s.key] = v == null ? '' : String(v);
+      // don't overwrite local string while the input is focused (user is editing)
+      out[s.key] = (focused[s.key]) ? (strWeights[s.key] ?? (v == null ? '' : String(v))) : (v == null ? '' : String(v));
     });
     setStrWeights(out);
   }, [temp]);
@@ -55,18 +61,31 @@ export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: P
                 inputMode="decimal"
                 className="w-full px-2 py-1.5 text-sm border rounded-md focus:ring-2 focus:ring-blue-500"
                 value={strWeights[s.key] ?? ''}
-                onChange={e => {
-                  const v = e.target.value;
-                  setStrWeights(prev => ({ ...prev, [s.key]: v }));
-
+                onFocus={() => setFocused(f => ({ ...f, [s.key]: true }))}
+                onBlur={() => {
+                  setFocused(f => ({ ...f, [s.key]: false }));
+                  const v = strWeights[s.key] ?? '';
                   if (v === '') {
                     onChange({ ...temp, weights: { ...temp.weights, [s.key]: null } });
                     return;
                   }
-
                   const parsed = parseFloat(v);
-                  // Only commit numeric value when parseFloat yields a finite number.
-                  // This preserves intermediate inputs such as '.' or '1.' in the UI.
+                  if (Number.isFinite(parsed)) {
+                    onChange({ ...temp, weights: { ...temp.weights, [s.key]: parsed } });
+                  } else {
+                    // on blur with invalid input, set to null to avoid stale invalid values
+                    onChange({ ...temp, weights: { ...temp.weights, [s.key]: null } });
+                  }
+                }}
+                onChange={e => {
+                  const v = e.target.value;
+                  setStrWeights(prev => ({ ...prev, [s.key]: v }));
+                  // allow empty to immediately set null in parent, but avoid forcing numeric on intermediate inputs
+                  if (v === '') {
+                    onChange({ ...temp, weights: { ...temp.weights, [s.key]: null } });
+                    return;
+                  }
+                  const parsed = parseFloat(v);
                   if (Number.isFinite(parsed)) {
                     onChange({ ...temp, weights: { ...temp.weights, [s.key]: parsed } });
                   }
