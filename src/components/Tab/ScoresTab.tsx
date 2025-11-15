@@ -29,7 +29,11 @@ export default function ScoresTab({ scores, updateScore }: Props) {
           />
         </div>
       ))}
-      <div className="text-xs text-gray-500 text-center pt-2">入力は自動保存されます</div>
+      <div className="text-xs text-gray-500 text-center pt-2">
+        入力は自動保存されます。<br/>
+        サイト内の全ての入力データは、あなたの端末のブラウザ内に保存され、サーバーには一切送信されません。<br/>
+        MITライセンスで提供されています。<br/>
+      </div>
     </div>
   );
 }
