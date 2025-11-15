@@ -11,8 +11,6 @@ import {
   Weights,
 } from '@/data/universities';
 
-import DepartmentEditor from './DepartmentEditor';
-import UniversityEditor from './UniversityEditor';
 import UniversityList from './UniversityList';
 
 const LS_SCORES = 'kkc_scores_v1';
@@ -50,7 +48,6 @@ export default function Calculator() {
   const [selectedFacultyId, setSelectedFacultyId] = useState<string>('');
   const [selectedDeptId, setSelectedDeptId] = useState<string>('');
 
-  const [editing, setEditing] = useState<null | Univ>(null);
   const [editingDept, setEditingDept] = useState<null | {
     univId: string;
     facId: string;
@@ -153,15 +150,9 @@ export default function Calculator() {
       ],
     };
     setUniversities(u => [...u, newU]);
-    setEditing(newU);
     setSelectedUnivId(id);
     setSelectedFacultyId(`${id}_fac1`);
     setSelectedDeptId(`${id}_fac1_dept1`);
-  }
-
-  function saveUniversity(univ: Univ) {
-    setUniversities(u => u.map(x => (x.id === univ.id ? univ : x)));
-    setEditing(null);
   }
 
   function deleteUniversity(id: string) {
@@ -242,10 +233,7 @@ export default function Calculator() {
           setSelectedFacultyId(facId);
           setSelectedDeptId(deptId);
         }}
-        onEditUniversity={u => {
-          setEditing(u);
-        }}
-        onSetEditingDept={payload => setEditingDept(payload)}
+        
         addDepartment={(univId, facId) => {
           const id = `dept_${Date.now()}`;
           setUniversities(prev =>
@@ -347,53 +335,6 @@ export default function Calculator() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="md:col-span-1">
-          <div className="bg-card border rounded-md p-4">
-            <h3 className="font-medium mb-2">編集 / 詳細</h3>
-            {editingDept ? (
-              <div>
-                <h4 className="font-medium mb-2">学科編集</h4>
-                <DepartmentEditor
-                  temp={editingDept.temp}
-                  onChange={(t: Department) => setEditingDept(ed => (ed ? { ...ed, temp: t } : ed))}
-                  onCancel={() => setEditingDept(null)}
-                  onSave={() => {
-                    if (!editingDept) return;
-                    setUniversities(prev =>
-                      prev.map(u => {
-                        if (u.id !== editingDept.univId) return u;
-                        return {
-                          ...u,
-                          faculties: u.faculties.map(f => {
-                            if (f.id !== editingDept.facId) return f;
-                            return {
-                              ...f,
-                              departments: f.departments.map(d =>
-                                d.id === editingDept.deptId ? { ...editingDept.temp } : d
-                              ),
-                            };
-                          }),
-                        };
-                      })
-                    );
-                    setEditingDept(null);
-                  }}
-                />
-              </div>
-            ) : editing ? (
-              <UniversityEditor
-                initialUniversity={editing}
-                onCancel={() => setEditing(null)}
-                onSave={u => saveUniversity(u)}
-              />
-            ) : (
-              <div className="text-sm text-muted-foreground">
-                大学または学科を選択して編集してください。
-              </div>
-            )}
           </div>
         </div>
       </div>
