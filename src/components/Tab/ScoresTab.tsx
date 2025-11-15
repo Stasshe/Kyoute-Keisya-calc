@@ -10,6 +10,9 @@ type Props = {
 export default function ScoresTab({ scores, updateScore }: Props) {
   return (
     <div className="p-3 space-y-2">
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded text-sm text-gray-700">
+        理系型の人は、社会②を0または空欄にしてください。<br />文系型の人は、理科基礎の合計を理科①に入力してください。
+      </div>
       {SUBJECTS.map(s => (
         <div key={s.key} className="bg-white rounded-lg border p-2.5 shadow-sm">
           <div className="flex items-center justify-between mb-1.5">
