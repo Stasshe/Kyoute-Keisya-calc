@@ -22,9 +22,8 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
     })),
   });
 
-  const [expandedFacs, setExpandedFacs] = useState<Set<string>>(
-    new Set(univ.faculties.map(f => f.id))
-  );
+  // 学部のアコーディオンはデフォルトで閉じる
+  const [expandedFacs, setExpandedFacs] = useState<Set<string>>(new Set());
 
   function toggleFac(id: string) {
     setExpandedFacs(prev => {
