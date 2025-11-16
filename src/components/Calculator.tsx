@@ -308,7 +308,7 @@ export default function Calculator() {
           >
             <span className="inline-flex items-center gap-2 justify-center">
               <GraduationCap className="w-4 h-4" />
-              大学選択
+              配点入力
             </span>
           </button>
           <button
