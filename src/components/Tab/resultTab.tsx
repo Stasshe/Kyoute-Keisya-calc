@@ -22,7 +22,8 @@ import {
 import { Department, SUBJECTS } from '@/data/universities';
 
 type Props = {
-  scores: Record<string, number>;
+  // scores は文字列（入力文字列）を受け取る。計算時に Number(...) で数値化する
+  scores: Record<string, string>;
   department?: Department;
   universityName?: string;
   facultyName?: string;

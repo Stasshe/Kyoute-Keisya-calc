@@ -3,7 +3,8 @@
 import { SUBJECTS } from '@/data/universities';
 
 type Props = {
-  scores: Record<string, number>;
+  // scores は文字列を保持する
+  scores: Record<string, string>;
   updateScore: (key: string, value: string) => void;
 };
 

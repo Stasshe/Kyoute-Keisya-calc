@@ -22,14 +22,10 @@ const LS_CUSTOM = 'kkc_custom_univs_v1';
 
 type Univ = University;
 
-function safeNumber(v: string) {
-  const n = parseFloat(v);
-  return Number.isFinite(n) ? n : 0;
-}
-
 export default function Calculator() {
   const [activeTab, setActiveTab] = useState<'input' | 'list' | 'result'>('input');
-  const [scores, setScores] = useState<Record<string, number>>({});
+  // scores は入力文字列を保持する（入力中に "32." を許容するため）
+  const [scores, setScores] = useState<Record<string, string>>({});
 
   const [universities, setUniversities] = useState<Univ[]>(() => [...DEFAULT_UNIVERSITIES]);
 
@@ -84,7 +80,16 @@ export default function Calculator() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LS_SCORES);
-      if (raw) setScores(JSON.parse(raw));
+      if (raw) {
+        // 既存の保存データが number の場合に備えてすべて string に変換して読み込む
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          const coerced: Record<string, string> = Object.fromEntries(
+            Object.entries(parsed).map(([k, v]) => [k, v == null ? '' : String(v)])
+          );
+          setScores(coerced);
+        }
+      }
     } catch {
       // ignore
     }
@@ -141,6 +146,7 @@ export default function Calculator() {
     if (!dept) return 0;
     let sum = 0;
     for (const s of SUBJECTS) {
+      // scores は文字列なので Number(...) で数値化する
       const val = Number(scores[s.key] ?? 0) || 0;
       const w = Number(dept.weights[s.key] ?? 0) || 0;
       sum += (val / s.max) * w;
@@ -160,8 +166,9 @@ export default function Calculator() {
     return Math.round((total / maxTotal) * 1000) / 10; // 小数1位まで
   }, [total, maxTotal]);
 
+  // 入力は文字列のまま保存して、必要な時に数値化する
   function updateScore(key: string, value: string) {
-    setScores(s => ({ ...s, [key]: safeNumber(value) }));
+    setScores(s => ({ ...s, [key]: value }));
   }
 
   function addUniversity() {
