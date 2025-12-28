@@ -22,6 +22,21 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
     })),
   });
 
+  // editingWeights: deptId -> { subjectKey: string } を文字列で保持（入力中の未完成小数を許容するため）
+  const [editingWeights, setEditingWeights] = useState<Record<string, Record<string, string>>>(() => {
+    const map: Record<string, Record<string, string>> = {};
+    for (const f of initialUniversity.faculties) {
+      for (const d of f.departments) {
+        map[d.id] = {};
+        for (const s of SUBJECTS) {
+          const v = d.weights[s.key];
+          map[d.id][s.key] = v == null ? '' : String(v);
+        }
+      }
+    }
+    return map;
+  });
+
   // 学部のアコーディオンはデフォルトで閉じる
   const [expandedFacs, setExpandedFacs] = useState<Set<string>>(new Set());
 
@@ -62,12 +77,31 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
       ],
     };
     setUniv(u => ({ ...u, faculties: [...u.faculties, newF] }));
+    // editingWeights にも新しい学科のエントリを作る
+    setEditingWeights(prev => {
+      const next = { ...prev };
+      const deptId = `${id}_d1`;
+      next[deptId] = {};
+      for (const s of SUBJECTS) next[deptId][s.key] = '0';
+      return next;
+    });
     setExpandedFacs(prev => new Set([...prev, id]));
   }
 
   function deleteFaculty(facId: string) {
     if (!confirm('この学部を削除しますか？学科も全て削除されます。')) return;
+    // 学部に属する学科の editingWeights を削除
+    const fac = univ.faculties.find(f => f.id === facId);
     setUniv(u => ({ ...u, faculties: u.faculties.filter(f => f.id !== facId) }));
+    if (fac) {
+      setEditingWeights(prev => {
+        const next = { ...prev };
+        for (const d of fac.departments) {
+          delete next[d.id];
+        }
+        return next;
+      });
+    }
   }
 
   function addDepartment(facId: string) {
@@ -90,6 +124,13 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
           : f
       ),
     }));
+    // editingWeights にも追加
+    setEditingWeights(prev => {
+      const next = { ...prev };
+      next[id] = {};
+      for (const s of SUBJECTS) next[id][s.key] = '0';
+      return next;
+    });
     // expand the newly targeted faculty so the user sees the new department
     setExpandedFacs(prev => new Set([...Array.from(prev), facId]));
   }
@@ -102,6 +143,11 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
         f.id === facId ? { ...f, departments: f.departments.filter(d => d.id !== deptId) } : f
       ),
     }));
+    setEditingWeights(prev => {
+      const next = { ...prev };
+      delete next[deptId];
+      return next;
+    });
   }
 
   function updateDepartmentName(facId: string, deptId: string, name: string) {
@@ -115,30 +161,38 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
     }));
   }
 
+  // 入力中は文字列を保持する（編集用 state を更新）
   function updateDeptWeight(facId: string, deptId: string, key: string, value: string) {
-    const v = value;
-    const n = parseFloat(v);
-    setUniv(u => ({
-      ...u,
-      faculties: u.faculties.map(f =>
-        f.id === facId
-          ? {
-              ...f,
-              departments: f.departments.map(d =>
-                d.id === deptId
-                  ? {
-                      ...d,
-                      weights: {
-                        ...d.weights,
-                        [key]: v === '' ? null : Number.isFinite(n) ? n : null,
-                      },
-                    }
-                  : d
-              ),
+    setEditingWeights(prev => {
+      const next = { ...prev };
+      next[deptId] = { ...(next[deptId] || {}) , [key]: value };
+      return next;
+    });
+  }
+
+  // 保存時に editingWeights をパースして数値または null に変換して onSave に渡す
+  function handleSave() {
+    const newUniv: University = {
+      ...univ,
+      faculties: univ.faculties.map(f => ({
+        ...f,
+        departments: f.departments.map(d => {
+          const ew = editingWeights[d.id] || {};
+          const newWeights: Weights = {} as Weights;
+          for (const s of SUBJECTS) {
+            const raw = (ew[s.key] ?? '').trim();
+            if (raw === '') {
+              newWeights[s.key] = null;
+            } else {
+              const n = parseFloat(raw);
+              newWeights[s.key] = Number.isFinite(n) ? n : null;
             }
-          : f
-      ),
-    }));
+          }
+          return { ...d, weights: newWeights };
+        }),
+      })),
+    };
+    onSave(newUniv);
   }
 
   return (
@@ -242,7 +296,10 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
                               <input
                                 type="text"
                                 inputMode="decimal"
-                                value={d.weights[s.key] == null ? '' : String(d.weights[s.key])}
+                                value={
+                                  editingWeights[d.id]?.[s.key] ??
+                                  (d.weights[s.key] == null ? '' : String(d.weights[s.key]))
+                                }
                                 onChange={e => updateDeptWeight(f.id, d.id, s.key, e.target.value)}
                                 className="w-full px-2 py-1.5 text-sm border rounded bg-white"
                               />
@@ -278,7 +335,7 @@ export default function UniversityEditor({ initialUniversity, onSave, onCancel }
           キャンセル
         </button>
         <button
-          onClick={() => onSave(univ)}
+          onClick={handleSave}
           className="flex-1 py-2.5 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600"
         >
           保存
