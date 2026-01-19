@@ -67,9 +67,6 @@ const config: Config = {
     },
   },
   plugins: [],
-  experimental: {
-    optimizeUniversalDefaults: true,
-  },
 };
 
 export default config;
