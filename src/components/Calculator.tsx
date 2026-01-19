@@ -426,6 +426,13 @@ export default function Calculator() {
                 setEditingUniversity(null);
               }}
               onCancelEditUniversity={() => setEditingUniversity(null)}
+              onImportUniversities={(importedUniversities: Univ[]) => {
+                const existingIds = new Set(universities.map(u => u.id));
+                const newUniversities = importedUniversities.filter(u => !existingIds.has(u.id));
+                if (newUniversities.length > 0) {
+                  setUniversities(prev => [...prev, ...newUniversities]);
+                }
+              }}
             />
           </div>
         )}

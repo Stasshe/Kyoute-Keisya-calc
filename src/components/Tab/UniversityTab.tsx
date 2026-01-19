@@ -4,6 +4,7 @@ import { Department, University } from '@/data/universities';
 
 import UniversityEditor from '../UniversityEditor';
 import UniversityList from '../UniversityList';
+import WeightExportImport from '../WeightExportImport';
 
 type EditingDept = null | { univId: string; facId: string; deptId: string; temp: Department };
 
@@ -26,6 +27,7 @@ type Props = {
   saveDept: (payload: { univId: string; facId: string; deptId: string; temp: Department }) => void;
   onSaveUniversity: (u: University) => void;
   onCancelEditUniversity: () => void;
+  onImportUniversities: (universities: University[]) => void;
 };
 
 export default function UniversityTab({
@@ -47,9 +49,12 @@ export default function UniversityTab({
   saveDept,
   onSaveUniversity,
   onCancelEditUniversity,
+  onImportUniversities,
 }: Props) {
   return (
-    <div>
+    <div className="space-y-3">
+      <WeightExportImport universities={universities} onImport={onImportUniversities} />
+
       {editingUniversity ? (
         <UniversityEditor
           initialUniversity={editingUniversity}
