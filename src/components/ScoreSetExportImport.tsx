@@ -21,7 +21,7 @@ export default function ScoreSetExportImport({ scoreSets, onImport }: Props) {
       await navigator.clipboard.writeText(exportData);
       alert('保存データをクリップボードにコピーしました！');
     } catch (err) {
-      alert('クリップボードへのコピーに失敗しました。ブラウザの設定を確認してください。');
+      alert('クリップボードへのコピーに失敗しました。');
     }
   };
 
@@ -58,7 +58,8 @@ export default function ScoreSetExportImport({ scoreSets, onImport }: Props) {
       setShowImport(false);
       alert(`${validScoreSets.length}件の保存データをインポートしました！`);
     } catch (err) {
-      alert('データの解析に失敗しました。正しいJSON形式で入力してください。');
+      const errorMsg = err instanceof Error ? err.message : 'データの解析に失敗しました。';
+      alert(`${errorMsg} 正しいJSON形式で入力してください。`);
     }
   };
 

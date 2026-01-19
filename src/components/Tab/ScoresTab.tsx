@@ -168,7 +168,7 @@ export default function ScoresTab({ scores, updateScore }: Props) {
     const existingIds = new Set(scoreSets.map(s => s.id));
     const newSets = importedSets.map(s => {
       if (existingIds.has(s.id)) {
-        return { ...s, id: `set_${Date.now()}_${Math.random()}` };
+        return { ...s, id: `set_${Date.now()}_${Math.floor(Math.random() * 1000000)}` };
       }
       return s;
     });
