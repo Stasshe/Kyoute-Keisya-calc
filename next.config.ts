@@ -35,9 +35,6 @@ const nextConfig = {
     unoptimized: true,
   },
   // 本番ビルドでは各種エラーで失敗しないようにする
-  eslint: {
-    ignoreDuringBuilds: isProductionBuild,
-  },
   typescript: {
     ignoreBuildErrors: isProductionBuild,
   },
@@ -47,4 +44,4 @@ const nextConfig = {
 
 console.log(`Building in ${isProductionBuild ? 'PRODUCTION' : 'DEVELOPMENT'} mode`);
 
-module.exports = nextConfig;
+export default nextConfig;
