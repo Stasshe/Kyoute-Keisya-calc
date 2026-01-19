@@ -44,6 +44,7 @@ export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: P
           onChange={e => onChange({ ...temp, name: e.target.value })}
           className="w-full px-3 py-2 text-sm border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           placeholder="学科名を入力"
+          style={{ fontSize: '16px' }}
         />
       </div>
 
@@ -63,6 +64,7 @@ export default function DepartmentEditor({ temp, onChange, onCancel, onSave }: P
                 inputMode="decimal"
                 className="w-full px-2 py-1.5 text-sm border rounded-md focus:ring-2 focus:ring-blue-500"
                 value={strWeights[s.key] ?? ''}
+                style={{ fontSize: '16px' }}
                 onFocus={() => setFocused(f => ({ ...f, [s.key]: true }))}
                 onBlur={() => {
                   setFocused(f => ({ ...f, [s.key]: false }));
