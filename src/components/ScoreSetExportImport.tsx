@@ -67,7 +67,7 @@ export default function ScoreSetExportImport({ scoreSets, onImport }: Props) {
     <div className="bg-white rounded-lg border shadow-sm p-3 space-y-2">
       <h3 className="text-sm font-semibold text-gray-700 mb-2">保存データの管理</h3>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <button
           onClick={handleExport}
           className="flex-1 px-3 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"
@@ -96,7 +96,7 @@ export default function ScoreSetExportImport({ scoreSets, onImport }: Props) {
             className="w-full h-32 px-2 py-1 text-xs font-mono border rounded"
             style={{ fontSize: '12px' }}
           />
-          <div className="flex gap-2 mt-2">
+          <div className="flex flex-col sm:flex-row gap-2 mt-2">
             <button
               onClick={handleImport}
               className="flex-1 px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600"

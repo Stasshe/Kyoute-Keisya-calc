@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Save, Trash2, X } from 'lucide-react';
+import { Edit2, Plus, Save, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { SUBJECTS } from '@/data/universities';
@@ -224,43 +224,54 @@ export default function ScoresTab({ scores, updateScore }: Props) {
                         cancelEditName();
                       }
                     }}
-                    className="flex-1 px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 min-w-0"
                     placeholder="データセット名"
                     style={{ fontSize: '16px' }}
                     autoFocus
                   />
                   <button
                     onClick={saveEditName}
-                    className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600 flex-shrink-0"
+                    title="保存"
                   >
                     <Save className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={cancelEditName}
-                    className="p-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    className="p-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 flex-shrink-0"
+                    title="キャンセル"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
-                <span
-                  onClick={() => startEditName(set.id, set.name)}
-                  className="text-sm flex-1 truncate cursor-pointer hover:text-blue-600"
-                  title="クリックして名前を編集"
-                >
-                  {set.name}
-                </span>
-              )}
-              {set.id === activeSetId && editingSetId !== set.id && (
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    deleteSet(set.id);
-                  }}
-                  className="p-1 text-red-600 hover:bg-red-50 rounded"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <>
+                  <span className="text-sm flex-1 truncate min-w-0">{set.name}</span>
+                  {set.id === activeSetId && (
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          startEditName(set.id, set.name);
+                        }}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                        title="名前変更"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          deleteSet(set.id);
+                        }}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                        title="削除"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}
