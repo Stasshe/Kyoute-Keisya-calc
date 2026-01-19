@@ -1,7 +1,7 @@
 'use client';
 
 import { Copy, Edit2, Plus, Save, Trash2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { SUBJECTS } from '@/data/universities';
 import { ScoreSet } from '@/types/scoreSet';
@@ -19,6 +19,7 @@ export default function ScoresTab({ scores, updateScore }: Props) {
   const [activeSetId, setActiveSetId] = useState<string>('');
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState('');
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     try {
@@ -62,21 +63,35 @@ export default function ScoresTab({ scores, updateScore }: Props) {
   }, []);
 
   useEffect(() => {
-    if (activeSetId && scoreSets.length > 0) {
-      const updatedSets = scoreSets.map(set => {
-        if (set.id === activeSetId) {
-          return {
-            ...set,
-            scores: { ...scores },
-            updatedAt: Date.now(),
-          };
-        }
-        return set;
-      });
-      setScoreSets(updatedSets);
-      localStorage.setItem(LS_SCORE_SETS, JSON.stringify(updatedSets));
+    if (!activeSetId) return;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-  }, [scores]);
+
+    saveTimeoutRef.current = setTimeout(() => {
+      setScoreSets(prevSets => {
+        const updatedSets = prevSets.map(set => {
+          if (set.id === activeSetId) {
+            return {
+              ...set,
+              scores: { ...scores },
+              updatedAt: Date.now(),
+            };
+          }
+          return set;
+        });
+        localStorage.setItem(LS_SCORE_SETS, JSON.stringify(updatedSets));
+        return updatedSets;
+      });
+    }, 300);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [scores, activeSetId]);
 
   const addNewSet = () => {
     const newSet: ScoreSet = {
@@ -175,7 +190,7 @@ export default function ScoresTab({ scores, updateScore }: Props) {
               <input
                 type="radio"
                 checked={set.id === activeSetId}
-                onChange={() => {}}
+                onChange={() => switchSet(set.id)}
                 className="w-4 h-4 flex-shrink-0"
               />
               <span className="text-sm flex-1 truncate">{set.name}</span>

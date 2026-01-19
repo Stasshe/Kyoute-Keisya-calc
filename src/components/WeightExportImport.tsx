@@ -24,7 +24,7 @@ export default function WeightExportImport({ universities, onImport }: Props) {
       alert('配点データをクリップボードにコピーしました！');
       setShowExport(false);
     } catch (err) {
-      setShowExport(true);
+      alert('クリップボードへのコピーに失敗しました。ブラウザの設定を確認してください。');
     }
   };
 
