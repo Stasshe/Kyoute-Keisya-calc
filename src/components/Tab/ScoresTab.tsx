@@ -1,10 +1,12 @@
 'use client';
 
-import { Copy, Edit2, Plus, Save, Trash2, X } from 'lucide-react';
+import { Edit2, Plus, Save, Trash2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { SUBJECTS } from '@/data/universities';
 import { ScoreSet } from '@/types/scoreSet';
+
+import ScoreSetExportImport from '../ScoreSetExportImport';
 
 type Props = {
   scores: Record<string, string>;
@@ -17,7 +19,7 @@ const LS_ACTIVE_SET = 'kkc_active_set_v2';
 export default function ScoresTab({ scores, updateScore }: Props) {
   const [scoreSets, setScoreSets] = useState<ScoreSet[]>([]);
   const [activeSetId, setActiveSetId] = useState<string>('');
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [editingSetId, setEditingSetId] = useState<string>('');
   const [editName, setEditName] = useState('');
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -141,12 +143,9 @@ export default function ScoresTab({ scores, updateScore }: Props) {
     }
   };
 
-  const startEditName = () => {
-    const activeSet = scoreSets.find(s => s.id === activeSetId);
-    if (activeSet) {
-      setEditName(activeSet.name);
-      setIsEditingName(true);
-    }
+  const startEditName = (setId: string, currentName: string) => {
+    setEditingSetId(setId);
+    setEditName(currentName);
   };
 
   const saveEditName = () => {
@@ -154,19 +153,39 @@ export default function ScoresTab({ scores, updateScore }: Props) {
       alert('名前を入力してください');
       return;
     }
-    const updated = scoreSets.map(s => (s.id === activeSetId ? { ...s, name: editName.trim() } : s));
+    const updated = scoreSets.map(s => (s.id === editingSetId ? { ...s, name: editName.trim() } : s));
     setScoreSets(updated);
     localStorage.setItem(LS_SCORE_SETS, JSON.stringify(updated));
-    setIsEditingName(false);
+    setEditingSetId('');
+  };
+
+  const cancelEditName = () => {
+    setEditingSetId('');
+    setEditName('');
+  };
+
+  const handleImport = (importedSets: ScoreSet[]) => {
+    const existingIds = new Set(scoreSets.map(s => s.id));
+    const newSets = importedSets.map(s => {
+      if (existingIds.has(s.id)) {
+        return { ...s, id: `set_${Date.now()}_${Math.floor(Math.random() * 1000000)}` };
+      }
+      return s;
+    });
+    const updated = [...scoreSets, ...newSets];
+    setScoreSets(updated);
+    localStorage.setItem(LS_SCORE_SETS, JSON.stringify(updated));
   };
 
   const activeSet = scoreSets.find(s => s.id === activeSetId);
 
   return (
     <div className="p-3 space-y-3">
+      <ScoreSetExportImport scoreSets={scoreSets} onImport={handleImport} />
+
       <div className="bg-white rounded-lg border shadow-sm p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-700">保存データ管理</h3>
+          <h3 className="text-sm font-semibold text-gray-700">保存データ一覧</h3>
           <button
             onClick={addNewSet}
             className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-1"
@@ -180,71 +199,83 @@ export default function ScoresTab({ scores, updateScore }: Props) {
           {scoreSets.map(set => (
             <div
               key={set.id}
-              className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
+              className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
                 set.id === activeSetId
                   ? 'bg-blue-50 border border-blue-300'
                   : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
               }`}
-              onClick={() => switchSet(set.id)}
             >
               <input
                 type="radio"
                 checked={set.id === activeSetId}
                 onChange={() => switchSet(set.id)}
-                className="w-4 h-4 flex-shrink-0"
+                className="w-4 h-4 flex-shrink-0 cursor-pointer"
               />
-              <span className="text-sm flex-1 truncate">{set.name}</span>
-              {set.id === activeSetId && (
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    deleteSet(set.id);
-                  }}
-                  className="p-1 text-red-600 hover:bg-red-50 rounded"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+              {editingSetId === set.id ? (
+                <div className="flex-1 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        saveEditName();
+                      } else if (e.key === 'Escape') {
+                        cancelEditName();
+                      }
+                    }}
+                    className="flex-1 px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 min-w-0"
+                    placeholder="データセット名"
+                    style={{ fontSize: '16px' }}
+                    autoFocus
+                  />
+                  <button
+                    onClick={saveEditName}
+                    className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600 flex-shrink-0"
+                    title="保存"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={cancelEditName}
+                    className="p-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 flex-shrink-0"
+                    title="キャンセル"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <span className="text-sm flex-1 truncate min-w-0">{set.name}</span>
+                  {set.id === activeSetId && (
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          startEditName(set.id, set.name);
+                        }}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                        title="名前変更"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          deleteSet(set.id);
+                        }}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                        title="削除"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ))}
         </div>
-
-        {activeSet && (
-          <div className="mt-2 pt-2 border-t">
-            {isEditingName ? (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={e => setEditName(e.target.value)}
-                  className="flex-1 px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-blue-500"
-                  placeholder="データセット名"
-                  style={{ fontSize: '16px' }}
-                />
-                <button
-                  onClick={saveEditName}
-                  className="p-1.5 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  <Save className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setIsEditingName(false)}
-                  className="p-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={startEditName}
-                className="w-full text-left px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded flex items-center gap-1"
-              >
-                <Edit2 className="w-3 h-3" />
-                名前を変更
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
       <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded text-sm text-gray-700">
